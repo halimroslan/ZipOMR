@@ -642,7 +642,7 @@
                 for (let j = 0; j < PILIHAN.length; j++) {
                     let cx = geo.posXPilihan[j];
                     ctxDebug.beginPath();
-                    ctxDebug.arc(cx, cy, cy, r, 0, 2 * Math.PI); // FIXED: The code had an issue here if it was exactly copied, wait no, let's keep exact
+                    ctxDebug.arc(cx, cy, r, 0, 2 * Math.PI); // Masalah utama kat sini dah dibetulkan (r bukannya cy)
                     
                     if (PILIHAN[j] === pilihanPelajar) {
                         ctxDebug.fillStyle = "rgba(0, 255, 0, 0.6)"; 
