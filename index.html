@@ -753,20 +753,29 @@
             ctx.lineWidth = 1;
             ctx.strokeRect(geo.boxX, geo.boxY, geo.boxW, geo.boxH);
 
-            // Bucu gaya Apple (rounded inside target)
-            let ms = Math.max(20, geo.boxW * 0.05);
-            ctx.strokeStyle = '#0071e3'; // Apple Blue
-            ctx.lineWidth = 4;
-            ctx.lineCap = 'round';
+            // 4 Kotak Biru Sasaran (Target Boxes untuk titik reference)
+            let ts = Math.max(30, geo.boxW * 0.08); // Saiz kotak sasaran
+            let halfTs = ts / 2;
             
-            // TL
-            ctx.beginPath(); ctx.moveTo(geo.boxX - ms/2, geo.boxY + ms/2); ctx.lineTo(geo.boxX - ms/2, geo.boxY - ms/2); ctx.lineTo(geo.boxX + ms/2, geo.boxY - ms/2); ctx.stroke();
-            // TR
-            ctx.beginPath(); ctx.moveTo(geo.boxX + geo.boxW - ms/2, geo.boxY - ms/2); ctx.lineTo(geo.boxX + geo.boxW + ms/2, geo.boxY - ms/2); ctx.lineTo(geo.boxX + geo.boxW + ms/2, geo.boxY + ms/2); ctx.stroke();
-            // BL
-            ctx.beginPath(); ctx.moveTo(geo.boxX - ms/2, geo.boxY + geo.boxH - ms/2); ctx.lineTo(geo.boxX - ms/2, geo.boxY + geo.boxH + ms/2); ctx.lineTo(geo.boxX + ms/2, geo.boxY + geo.boxH + ms/2); ctx.stroke();
-            // BR
-            ctx.beginPath(); ctx.moveTo(geo.boxX + geo.boxW + ms/2, geo.boxY + geo.boxH - ms/2); ctx.lineTo(geo.boxX + geo.boxW + ms/2, geo.boxY + geo.boxH + ms/2); ctx.lineTo(geo.boxX + geo.boxW - ms/2, geo.boxY + geo.boxH + ms/2); ctx.stroke();
+            ctx.strokeStyle = '#0071e3'; // Apple Blue
+            ctx.lineWidth = 3;
+            ctx.fillStyle = 'rgba(0, 113, 227, 0.15)'; // Fill biru lutsinar
+            
+            // TL (Top Left)
+            ctx.fillRect(geo.boxX - halfTs, geo.boxY - halfTs, ts, ts);
+            ctx.strokeRect(geo.boxX - halfTs, geo.boxY - halfTs, ts, ts);
+            
+            // TR (Top Right)
+            ctx.fillRect(geo.boxX + geo.boxW - halfTs, geo.boxY - halfTs, ts, ts);
+            ctx.strokeRect(geo.boxX + geo.boxW - halfTs, geo.boxY - halfTs, ts, ts);
+            
+            // BL (Bottom Left)
+            ctx.fillRect(geo.boxX - halfTs, geo.boxY + geo.boxH - halfTs, ts, ts);
+            ctx.strokeRect(geo.boxX - halfTs, geo.boxY + geo.boxH - halfTs, ts, ts);
+            
+            // BR (Bottom Right)
+            ctx.fillRect(geo.boxX + geo.boxW - halfTs, geo.boxY + geo.boxH - halfTs, ts, ts);
+            ctx.strokeRect(geo.boxX + geo.boxW - halfTs, geo.boxY + geo.boxH - halfTs, ts, ts);
 
             const r = geo.rowHeight * 0.40; 
             for (let i = 0; i < JUMLAH_SOALAN; i++) {
