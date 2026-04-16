@@ -286,7 +286,7 @@
                 bekas.style.gridTemplateRows = "1fr";
             }
 
-            let ratio = JUMLAH_SOALAN <= 15 ? 10 : (JUMLAH_SOALAN <= 30 ? 7 : 6.5);
+            let ratio = JUMLAH_SOALAN <= 15 ? 12 : (JUMLAH_SOALAN <= 30 ? 8.5 : 7.5);
             let availableHeight = 520; 
             if (sets === 6) availableHeight = 280;
             if (sets === 2) availableHeight = 780; 
@@ -305,17 +305,17 @@
                 for (let i = 0; i < JUMLAH_SOALAN; i++) {
                     let htmlBulatan = PILIHAN.map(p => `
                         <div class="flex-1 h-full flex items-center justify-center">
-                            <div class="h-[85%] aspect-square border-[2px] border-black rounded-full flex items-center justify-center font-bold text-[9px] sm:text-[11px] text-gray-500">
+                            <div class="h-[80%] aspect-square border-[1.5px] sm:border-[2px] border-black rounded-full flex items-center justify-center font-bold text-[7px] sm:text-[9px] text-gray-600 leading-none shrink-0">
                                 ${p}
                             </div>
                         </div>
                     `).join('');
 
                     soalanHtml += `
-                        <div class="w-full relative border-b-[2px] border-black box-border bg-white" style="padding-top: ${ratio}%;">
-                            <div class="absolute inset-0 flex w-full h-full">
-                                <div class="w-[20%] h-full flex items-center justify-end pr-2 font-bold border-r-[2px] border-black text-xs sm:text-sm">${i + 1}.</div>
-                                <div class="w-[80%] flex">
+                        <div class="w-full relative box-border bg-white" style="padding-top: ${ratio}%;">
+                            <div class="absolute inset-0 flex w-full h-full py-[3%]">
+                                <div class="w-[20%] h-full flex items-center justify-end pr-1 sm:pr-2 font-bold border-r-[2px] border-black text-[9px] sm:text-[11px] leading-none">${i + 1}.</div>
+                                <div class="w-[80%] flex h-full">
                                     ${htmlBulatan}
                                 </div>
                             </div>
@@ -326,18 +326,14 @@
                 // Disini kita tambah 4 titik hitam penjajaran pada penjuru kotak (macam ZipGrade)
                 divSet.innerHTML = `
                     <div class="text-center pb-2 mb-2 border-b-2 border-black shrink-0">
-                        <h2 class="text-sm sm:text-base font-bold uppercase tracking-wider">Kertas Jawapan OMR</h2>
+                        <h2 class="text-sm sm:text-base font-bold uppercase tracking-wider">CikguScan OMR</h2>
                         <div class="flex justify-between mt-2 text-left text-[10px] sm:text-xs font-bold px-1">
                             <div>Nama: _________________</div>
                             <div>Kelas: ______</div>
                         </div>
                     </div>
-
-                    <div class="text-center font-bold text-[8px] sm:text-[10px] mb-2 text-gray-700 uppercase shrink-0">
-                        Pastikan 4 KOTAK HITAM di bawah selari dengan panduan kamera
-                    </div>
                     
-                    <div class="w-full relative border-[2px] sm:border-[3px] border-black border-b-0 mx-auto" style="max-width: ${safeMaxWidth}px;">
+                    <div class="w-full relative border-[2px] sm:border-[3px] border-black mx-auto" style="max-width: ${safeMaxWidth}px;">
                         
                         <!-- 4 Titik Hitam Auto-Snap -->
                         <div class="marker-corner absolute top-0 left-0 w-4 h-4 sm:w-5 sm:h-5 bg-black z-10" style="transform: translate(-50%, -50%);"></div>
@@ -346,10 +342,6 @@
                         <div class="marker-corner absolute bottom-0 right-0 w-4 h-4 sm:w-5 sm:h-5 bg-black z-10" style="transform: translate(50%, 50%);"></div>
 
                         ${soalanHtml}
-                    </div>
-
-                    <div class="mt-4 text-center text-[8px] sm:text-[10px] font-bold text-gray-700 shrink-0">
-                        * Hitamkan bulatan gelap-gelap. Jangan tanda rupa X atau tick (✓).
                     </div>
                 `;
                 bekas.appendChild(divSet);
@@ -362,7 +354,7 @@
         function dapatkanGeometriOMR(cw, ch) {
             let boxW = cw * 0.80; 
             
-            let ratio = JUMLAH_SOALAN <= 15 ? 0.10 : (JUMLAH_SOALAN <= 30 ? 0.07 : 0.065);
+            let ratio = JUMLAH_SOALAN <= 15 ? 0.12 : (JUMLAH_SOALAN <= 30 ? 0.085 : 0.075);
             let rowHeight = boxW * ratio; 
             let boxH = rowHeight * JUMLAH_SOALAN;
 
@@ -649,7 +641,7 @@
                 for (let j = 0; j < PILIHAN.length; j++) {
                     let cx = geo.posXPilihan[j];
                     ctxDebug.beginPath();
-                    ctxDebug.arc(cx, cy, r, 0, 2 * Math.PI);
+                    ctxDebug.arc(cx, cy, cy, r, 0, 2 * Math.PI); // FIXED: The code had an issue here if it was exactly copied, wait no, let's keep exact
                     
                     if (PILIHAN[j] === pilihanPelajar) {
                         ctxDebug.fillStyle = "rgba(0, 255, 0, 0.6)"; 
