@@ -34,6 +34,9 @@
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
+            .marker-corner {
+                background-color: black !important;
+            }
         }
     </style>
 </head>
@@ -97,24 +100,25 @@
 
             <!-- TAB: IMBAS (KAMERA) -->
             <div id="tab-imbas" class="tab-content hidden flex-col">
-                <h2 class="text-lg font-bold mb-2">Imbas Jawapan Pelajar</h2>
-                <p class="text-sm text-gray-600 mb-4">Selaraskan <b class="text-red-600">kotak hitam soalan</b> dan bulatan pada kertas tepat-tepat dengan panduan merah di skrin.</p>
+                <h2 class="text-lg font-bold mb-1">Imbas Jawapan Pelajar</h2>
+                <p class="text-sm text-gray-600 mb-3">Selaraskan <b>4 titik hitam</b> di bucu borang ke dalam kotak hijau di bawah. Sistem akan <b>auto-snap</b>!</p>
                 
                 <div class="relative w-full h-[60vh] min-h-[350px] bg-gray-900 rounded-lg overflow-hidden flex items-center justify-center shadow-inner border border-gray-300">
                     <!-- Hidden video -->
                     <video id="kamera" class="hidden" autoplay playsinline></video>
                     <!-- Video frame render -->
                     <canvas id="canvas-video" class="absolute inset-0 w-full h-full"></canvas>
-                    <!-- Ghost Guides -->
+                    <!-- Overlay Panduan Auto-Snap -->
                     <canvas id="canvas-overlay" class="absolute inset-0 w-full h-full pointer-events-none z-10"></canvas>
                 </div>
 
                 <div class="mt-4 flex gap-2">
-                    <button onclick="mulakanKamera()" class="flex-1 bg-gray-200 text-gray-800 font-bold py-3 rounded-lg shadow hover:bg-gray-300">
+                    <button onclick="mulakanKamera()" class="flex-1 bg-gray-200 text-gray-800 font-bold py-3 rounded-lg shadow hover:bg-gray-300 text-sm">
                         Buka Kamera
                     </button>
-                    <button onclick="tangkapDanTanda()" class="flex-[2] bg-blue-600 text-white font-bold py-3 rounded-lg shadow hover:bg-blue-700">
-                        📸 Imbas & Tanda
+                    <!-- Butang ini sekadar backup jika auto-snap gagal -->
+                    <button onclick="tangkapDanTanda(false)" class="flex-[2] bg-blue-600 text-white font-bold py-3 rounded-lg shadow hover:bg-blue-700 text-sm">
+                        📸 Snap Manual
                     </button>
                 </div>
             </div>
@@ -156,6 +160,8 @@
         let skemaJawapan = Array(JUMLAH_SOALAN).fill(null);
         let streamKamera = null;
         let gelungKamera = null;
+        let isScanning = false;
+        let autoSnapCounter = 0;
 
         function kemaskiniJumlahSoalan() {
             let inputEl = document.getElementById('input-jumlah-soalan');
@@ -198,6 +204,7 @@
             }
 
             if (idTab === 'imbas') {
+                isScanning = false;
                 setTimeout(() => mulakanKamera(), 100);
             } else {
                 hentikanKamera();
@@ -233,26 +240,19 @@
         }
 
         // ==========================================
-        // FUNGSI CETAK BORANG (GRID A4 DINAMIK)
+        // FUNGSI CETAK BORANG (GRID A4 DINAMIK + TITIK PENJAJARAN)
         // ==========================================
         function janaBorangCetak() {
             const bekas = document.getElementById('cetakan-kertas-container');
             const labelOrientasi = document.getElementById('label-orientasi');
             bekas.innerHTML = '';
             
-            // Logik Grid: <= 5 (6 Set), 6-15 (4 Set), 16-30 (3 Set), 31-40 (2 Set Portrait)
             let sets = 3;
-            if (JUMLAH_SOALAN <= 5) {
-                sets = 6;
-            } else if (JUMLAH_SOALAN <= 15) {
-                sets = 4;
-            } else if (JUMLAH_SOALAN <= 30) {
-                sets = 3;
-            } else {
-                sets = 2; // 31-40 soalan
-            }
+            if (JUMLAH_SOALAN <= 5) sets = 6;
+            else if (JUMLAH_SOALAN <= 15) sets = 4;
+            else if (JUMLAH_SOALAN <= 30) sets = 3;
+            else sets = 2; // 31-40 soalan
             
-            // Suntik @page style dinamik berdasarkan orientasi
             let styleTag = document.getElementById('dynamic-print-style');
             if (!styleTag) {
                 styleTag = document.createElement('style');
@@ -279,32 +279,23 @@
                 bekas.style.height = "18cm";
                 bekas.style.gridTemplateRows = "1fr";
             } else {
-                // Untuk 31-40 soalan, cetak dalam bentuk A4 Portrait (2 lajur)
                 styleTag.innerHTML = "@media print { @page { size: A4 portrait; margin: 10mm; } }";
                 labelOrientasi.innerText = "A4 Portrait";
                 bekas.className = "grid grid-cols-2 gap-4 print:gap-8 w-full";
-                bekas.style.height = "26cm"; // Ketinggian lebih panjang untuk portrait
+                bekas.style.height = "26cm"; 
                 bekas.style.gridTemplateRows = "1fr";
             }
 
-            // NISBAH DINAMIK: Mengelakkan kotak menjadi kurus.
             let ratio = JUMLAH_SOALAN <= 15 ? 10 : (JUMLAH_SOALAN <= 30 ? 7 : 6.5);
-
-            // PENGIRAAN SAFE MAX WIDTH BARU SUPAYA TAK MELIMPAH
             let availableHeight = 520; 
             if (sets === 6) availableHeight = 280;
-            // Di kurangkan dari 900 kepada 780 untuk elak melimpah ke page 2
             if (sets === 2) availableHeight = 780; 
 
             let actualRatio = ratio / 100;
             let safeMaxWidth = Math.floor(availableHeight / (JUMLAH_SOALAN * actualRatio));
             
-            // Hadkan saiz maksimum secara mendatar supaya kemas
-            if (sets === 2) {
-                safeMaxWidth = Math.min(320, safeMaxWidth); // Portrait boleh lebih lebar sikit
-            } else {
-                safeMaxWidth = Math.min(280, safeMaxWidth); // Landscape perlu terhad
-            }
+            if (sets === 2) safeMaxWidth = Math.min(320, safeMaxWidth);
+            else safeMaxWidth = Math.min(280, safeMaxWidth);
 
             for (let s = 0; s < sets; s++) {
                 let divSet = document.createElement('div');
@@ -312,8 +303,6 @@
                 
                 let soalanHtml = '';
                 for (let i = 0; i < JUMLAH_SOALAN; i++) {
-                    
-                    // Besarkan bulatan ke 85% untuk mengisi baris supaya tidak nampak halus
                     let htmlBulatan = PILIHAN.map(p => `
                         <div class="flex-1 h-full flex items-center justify-center">
                             <div class="h-[85%] aspect-square border-[2px] border-black rounded-full flex items-center justify-center font-bold text-[9px] sm:text-[11px] text-gray-500">
@@ -334,6 +323,7 @@
                     `;
                 }
 
+                // Disini kita tambah 4 titik hitam penjajaran pada penjuru kotak (macam ZipGrade)
                 divSet.innerHTML = `
                     <div class="text-center pb-2 mb-2 border-b-2 border-black shrink-0">
                         <h2 class="text-sm sm:text-base font-bold uppercase tracking-wider">Kertas Jawapan OMR</h2>
@@ -344,10 +334,17 @@
                     </div>
 
                     <div class="text-center font-bold text-[8px] sm:text-[10px] mb-2 text-gray-700 uppercase shrink-0">
-                        Pastikan KOTAK HITAM di bawah masuk penuh dalam panduan kamera
+                        Pastikan 4 KOTAK HITAM di bawah selari dengan panduan kamera
                     </div>
                     
-                    <div class="w-full border-[2px] sm:border-[3px] border-black border-b-0 mx-auto" style="max-width: ${safeMaxWidth}px;">
+                    <div class="w-full relative border-[2px] sm:border-[3px] border-black border-b-0 mx-auto" style="max-width: ${safeMaxWidth}px;">
+                        
+                        <!-- 4 Titik Hitam Auto-Snap -->
+                        <div class="marker-corner absolute top-0 left-0 w-4 h-4 sm:w-5 sm:h-5 bg-black z-10" style="transform: translate(-50%, -50%);"></div>
+                        <div class="marker-corner absolute top-0 right-0 w-4 h-4 sm:w-5 sm:h-5 bg-black z-10" style="transform: translate(50%, -50%);"></div>
+                        <div class="marker-corner absolute bottom-0 left-0 w-4 h-4 sm:w-5 sm:h-5 bg-black z-10" style="transform: translate(-50%, 50%);"></div>
+                        <div class="marker-corner absolute bottom-0 right-0 w-4 h-4 sm:w-5 sm:h-5 bg-black z-10" style="transform: translate(50%, 50%);"></div>
+
                         ${soalanHtml}
                     </div>
 
@@ -360,19 +357,17 @@
         }
 
         // ==========================================
-        // MATEMATIK GEOMETRI OMR (SELARAS DENGAN CETAKAN)
+        // MATEMATIK GEOMETRI OMR
         // ==========================================
         function dapatkanGeometriOMR(cw, ch) {
-            let boxW = cw * 0.85; 
+            let boxW = cw * 0.80; 
             
-            // Nisbah dinamik diselaraskan tepat dengan fungsi cetakan
             let ratio = JUMLAH_SOALAN <= 15 ? 0.10 : (JUMLAH_SOALAN <= 30 ? 0.07 : 0.065);
             let rowHeight = boxW * ratio; 
             let boxH = rowHeight * JUMLAH_SOALAN;
 
-            // Jika tinggi kotak melebihi skrin, laraskan supaya muat
-            if (boxH > ch * 0.85) {
-                boxH = ch * 0.85;
+            if (boxH > ch * 0.80) {
+                boxH = ch * 0.80;
                 rowHeight = boxH / JUMLAH_SOALAN;
                 boxW = rowHeight / ratio;
             }
@@ -380,7 +375,6 @@
             const boxX = (cw - boxW) / 2;
             const boxY = (ch - boxH) / 2;
 
-            // X offsets tepat di tengah slot 20% bagi setiap pilihan
             const posXPilihan = [
                 boxX + boxW * 0.30, // A 
                 boxX + boxW * 0.50, // B
@@ -392,10 +386,13 @@
         }
 
         // ==========================================
-        // FUNGSI KAMERA OVERLAY VISUAL
+        // FUNGSI KAMERA OVERLAY & AUTO-SNAP
         // ==========================================
         async function mulakanKamera() {
             const video = document.getElementById('kamera');
+            isScanning = false;
+            autoSnapCounter = 0;
+
             if (streamKamera) {
                 video.play().catch(e => console.log(e));
                 renderFrameKamera();
@@ -415,6 +412,7 @@
         }
 
         function hentikanKamera() {
+            isScanning = true; // Hentikan auto-snap
             if (streamKamera) {
                 streamKamera.getTracks().forEach(track => track.stop());
                 streamKamera = null;
@@ -424,13 +422,12 @@
         }
 
         function renderFrameKamera() {
-            if (!streamKamera) return;
+            if (!streamKamera || isScanning) return;
 
             const video = document.getElementById('kamera');
             const cvsVideo = document.getElementById('canvas-video');
             const cvsOverlay = document.getElementById('canvas-overlay');
 
-            // Sync saiz canvas dengan saiz sebenar paparan
             if (cvsVideo.width !== cvsVideo.clientWidth) {
                 cvsVideo.width = cvsVideo.clientWidth;
                 cvsVideo.height = cvsVideo.clientHeight;
@@ -447,7 +444,6 @@
                 const ctxV = cvsVideo.getContext('2d', { willReadFrequently: true });
                 const ctxO = cvsOverlay.getContext('2d');
                 
-                // Draw live video secara "object-cover" (penuh ruang)
                 const scale = Math.max(cw / vw, ch / vh);
                 const drawW = vw * scale;
                 const drawH = vh * scale;
@@ -455,68 +451,142 @@
                 const drawY = (ch - drawH) / 2;
                 ctxV.drawImage(video, drawX, drawY, drawW, drawH);
 
-                // Draw alignment panduan (Merah & Putih)
-                lukisPanduan(ctxO, cw, ch);
+                const geo = dapatkanGeometriOMR(cw, ch);
+                lukisPanduan(ctxO, cw, ch, geo);
+
+                // --- LOGIK AUTO-SNAP ---
+                // Kita periksa setiap 10-15 frame supaya fon tak lag
+                autoSnapCounter++;
+                if (autoSnapCounter > 12) {
+                    autoSnapCounter = 0;
+                    if (semakAutoSnap(ctxV, geo)) {
+                        isScanning = true; // Berhenti imbas sementara
+                        
+                        // Buat kesan getaran (Haptic Feedback) jika sokong
+                        if (navigator.vibrate) {
+                            navigator.vibrate([100, 50, 100]); // Getar 2 kali cepat
+                        }
+
+                        // Kesan Flash Kamera visual
+                        ctxO.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                        ctxO.fillRect(0, 0, cw, ch);
+
+                        // Tunggu sekejap dan hantar untuk ditanda
+                        setTimeout(() => {
+                            tangkapDanTanda(true);
+                        }, 200);
+                        return; // Keluar dari loop rendering
+                    }
+                }
             }
             
-            gelungKamera = requestAnimationFrame(renderFrameKamera);
+            if (!isScanning) {
+                gelungKamera = requestAnimationFrame(renderFrameKamera);
+            }
         }
 
-        function lukisPanduan(ctx, cw, ch) {
+        function lukisPanduan(ctx, cw, ch, geo) {
             ctx.clearRect(0, 0, cw, ch);
-            const geo = dapatkanGeometriOMR(cw, ch);
 
-            // Gelapkan luar kotak supaya fokus
             ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
             ctx.fillRect(0, 0, cw, ch);
             ctx.clearRect(geo.boxX, geo.boxY, geo.boxW, geo.boxH);
 
-            // Kotak Luar Merah (Suruh cikgu align sini)
-            ctx.strokeStyle = '#ef4444'; 
-            ctx.lineWidth = 4;
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)'; 
+            ctx.lineWidth = 2;
             ctx.strokeRect(geo.boxX, geo.boxY, geo.boxW, geo.boxH);
 
-            // Saiz bulatan ghost bergantung pada ketinggian baris diselaraskan (0.40 sepadan h-[85%])
-            const r = geo.rowHeight * 0.40; 
+            // Lukis 4 Sasaran Bucu (Warna Hijau Terang)
+            let ms = Math.max(20, geo.boxW * 0.05);
+            ctx.strokeStyle = '#22c55e'; // Hijau
+            ctx.lineWidth = 4;
             
+            // TL
+            ctx.strokeRect(geo.boxX - ms/2, geo.boxY - ms/2, ms, ms);
+            // TR
+            ctx.strokeRect(geo.boxX + geo.boxW - ms/2, geo.boxY - ms/2, ms, ms);
+            // BL
+            ctx.strokeRect(geo.boxX - ms/2, geo.boxY + geo.boxH - ms/2, ms, ms);
+            // BR
+            ctx.strokeRect(geo.boxX + geo.boxW - ms/2, geo.boxY + geo.boxH - ms/2, ms, ms);
+
+            const r = geo.rowHeight * 0.40; 
             for (let i = 0; i < JUMLAH_SOALAN; i++) {
                 let cy = geo.boxY + (i * geo.rowHeight) + (geo.rowHeight / 2);
-                
-                // Garisan Pemisah Baris
-                if (i > 0) {
-                    ctx.beginPath();
-                    ctx.moveTo(geo.boxX, geo.boxY + (i * geo.rowHeight));
-                    ctx.lineTo(geo.boxX + geo.boxW, geo.boxY + (i * geo.rowHeight));
-                    ctx.strokeStyle = 'rgba(239, 68, 68, 0.3)';
-                    ctx.stroke();
-                }
-
-                // Bulatan Pilihan
                 for (let j = 0; j < 4; j++) {
                     let cx = geo.posXPilihan[j];
                     ctx.beginPath();
                     ctx.arc(cx, cy, r, 0, 2*Math.PI);
-                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
                     ctx.stroke();
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
-                    ctx.fill();
                 }
             }
+        }
+
+        // Memeriksa jika 4 titik penjuru adalah GELAP (Marker dikesan)
+        function semakAutoSnap(ctx, geo) {
+            let size = Math.max(8, geo.boxW * 0.02);
+            let half = size / 2;
+            
+            // Koordinat 4 bucu berdasarkan geometri kotak
+            let titikUjian = [
+                {x: geo.boxX - half, y: geo.boxY - half}, // Top Left
+                {x: geo.boxX + geo.boxW - half, y: geo.boxY - half}, // Top Right
+                {x: geo.boxX - half, y: geo.boxY + geo.boxH - half}, // Bottom Left
+                {x: geo.boxX + geo.boxW - half, y: geo.boxY + geo.boxH - half} // Bottom Right
+            ];
+
+            let jumlahGelap = 0;
+            
+            for (let pt of titikUjian) {
+                // Pastikan tak terkeluar canvas
+                let sx = Math.max(0, Math.min(ctx.canvas.width - size, pt.x));
+                let sy = Math.max(0, Math.min(ctx.canvas.height - size, pt.y));
+                
+                let imgData = ctx.getImageData(sx, sy, size, size);
+                let pixels = imgData.data;
+                let sum = 0;
+                
+                for (let i = 0; i < pixels.length; i += 4) {
+                    sum += (0.299 * pixels[i] + 0.587 * pixels[i+1] + 0.114 * pixels[i+2]);
+                }
+                let avg = sum / (pixels.length / 4);
+                
+                // Jika purata < 90, ia dikira warna hitam/gelap
+                if (avg < 90) jumlahGelap++; 
+            }
+
+            // Periksa bahagian tengah kertas untuk pastikan ia warna cerah (elak snap waktu gelap gelita)
+            let cx = geo.boxX + geo.boxW/2;
+            let cy = geo.boxY + geo.boxH/2;
+            let sx = Math.max(0, Math.min(ctx.canvas.width - size, cx - half));
+            let sy = Math.max(0, Math.min(ctx.canvas.height - size, cy - half));
+            
+            let cData = ctx.getImageData(sx, sy, size, size);
+            let cSum = 0;
+            for (let i = 0; i < cData.data.length; i+=4) {
+                cSum += (0.299 * cData.data[i] + 0.587 * cData.data[i+1] + 0.114 * cData.data[i+2]);
+            }
+            let cAvg = cSum / (cData.data.length / 4);
+
+            // AUTO SNAP: Jika 4 bucu gelap DAN tengah tu cerah
+            return (jumlahGelap === 4 && cAvg > 130);
         }
 
         // ==========================================
         // FUNGSI IMBAS DAN ANALISIS
         // ==========================================
-        function tangkapDanTanda() {
+        function tangkapDanTanda(dariAutoSnap = false) {
             if (skemaJawapan.includes(null)) {
                 alert("Cikgu belum siapkan skema jawapan!");
+                isScanning = false;
                 return;
             }
 
+            isScanning = true;
             const cvsVideo = document.getElementById('canvas-video');
             if (!cvsVideo.width) return;
 
-            // Berhenti kemaskini live frame, kita akan analisis frame semasa
             if(gelungKamera) cancelAnimationFrame(gelungKamera);
             analisisImej(cvsVideo);
         }
@@ -533,14 +603,14 @@
             const ctxDebug = canvasDebug.getContext('2d');
             ctxDebug.drawImage(sumberCanvas, 0, 0);
 
-            // Tunjuk balik kotak dikesan di keputusan
-            ctxDebug.strokeStyle = "yellow";
-            ctxDebug.lineWidth = 3;
+            // Tunjuk kotak sempadan di keputusan
+            ctxDebug.strokeStyle = "rgba(255, 255, 0, 0.5)";
+            ctxDebug.lineWidth = 2;
             ctxDebug.strokeRect(geo.boxX, geo.boxY, geo.boxW, geo.boxH);
 
             let markah = 0;
             let butiran = [];
-            const r = geo.rowHeight * 0.40; // Sampling diselaraskan
+            const r = geo.rowHeight * 0.40;
 
             for (let i = 0; i < JUMLAH_SOALAN; i++) {
                 let cy = geo.boxY + (i * geo.rowHeight) + (geo.rowHeight / 2);
@@ -553,7 +623,6 @@
                     let totalBrightness = 0;
 
                     for (let p = 0; p < pixels.length; p += 4) {
-                        // luminance standard
                         let brightness = (0.299 * pixels[p] + 0.587 * pixels[p+1] + 0.114 * pixels[p+2]);
                         totalBrightness += brightness;
                     }
@@ -561,14 +630,9 @@
                     tahapKegelapan.push(avgBrightness);
                 }
 
-                // TEKNIK KONTRAST DINAMIK (Bukan lagi threshold tetap)
-                // 1. Susun kecerahan dari paling gelap ke paling cerah
+                // Teknik Kontrast
                 let sortedBright = [...tahapKegelapan].sort((a,b) => a - b);
-                
-                // 2. Ambil purata 3 bulatan cerah sebagai "Warna Kertas Latar"
                 let avgPaper = (sortedBright[1] + sortedBright[2] + sortedBright[3]) / 3;
-                
-                // 3. Syarat: Perbezaan mesti lebih 25 mata contrast untuk dikira "Ditanda"
                 let thresholdContrast = 25; 
                 let pilihanPelajar = null;
 
@@ -576,31 +640,29 @@
                     let indeksJawapan = tahapKegelapan.indexOf(sortedBright[0]);
                     pilihanPelajar = PILIHAN[indeksJawapan];
                     
-                    // Semak Double Mark (Kalau bulatan ke-2 paling gelap pun berdekatan markah bulatan pertama)
                     if ((avgPaper - sortedBright[1]) > thresholdContrast) {
                         pilihanPelajar = "BATAL"; 
                     }
                 }
 
-                // LUKISAN DEBUG di Kanvas Keputusan
+                // Lukisan Debug Bulatan
                 for (let j = 0; j < PILIHAN.length; j++) {
                     let cx = geo.posXPilihan[j];
                     ctxDebug.beginPath();
                     ctxDebug.arc(cx, cy, r, 0, 2 * Math.PI);
                     
                     if (PILIHAN[j] === pilihanPelajar) {
-                        ctxDebug.fillStyle = "rgba(0, 255, 0, 0.6)"; // Hijau tanda dikesan
+                        ctxDebug.fillStyle = "rgba(0, 255, 0, 0.6)"; 
                         ctxDebug.fill();
                     } else if (pilihanPelajar === "BATAL" && (avgPaper - tahapKegelapan[j]) > thresholdContrast) {
-                        ctxDebug.fillStyle = "rgba(255, 165, 0, 0.6)"; // Oren kalau batal
+                        ctxDebug.fillStyle = "rgba(255, 165, 0, 0.6)"; 
                         ctxDebug.fill();
                     } else {
-                        ctxDebug.strokeStyle = "rgba(255, 0, 0, 0.5)"; // Merah kalau tak dikesan
+                        ctxDebug.strokeStyle = "rgba(255, 0, 0, 0.5)"; 
                         ctxDebug.stroke();
                     }
                 }
 
-                // Pemarkahan
                 let betul = false;
                 let jawapanSebenar = skemaJawapan[i];
                 if (pilihanPelajar === jawapanSebenar) { betul = true; markah++; }
