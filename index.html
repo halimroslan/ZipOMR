@@ -8,10 +8,6 @@
     <style>
         /* Tetapan CSS Khas Untuk Cetakan */
         @media print {
-            @page {
-                size: A4 landscape;
-                margin: 10mm; /* Margin selamat 1cm */
-            }
             body {
                 background-color: white !important;
             }
@@ -85,8 +81,8 @@
                 <div class="no-print mb-4 text-center shrink-0">
                     <h2 class="text-lg font-bold">Cetak Borang OMR</h2>
                     <p class="text-sm text-gray-600 mb-4">
-                        Format automatik <b>A4 Landscape</b>.<br>
-                        <span class="text-xs">(1-5 soalan: 6 set | 6-15 soalan: 4 set | 16-40 soalan: 3 set)</span>
+                        Format automatik <b id="label-orientasi">A4 Landscape</b>.<br>
+                        <span class="text-[10px] leading-tight block mt-1">(1-5: 6 Set | 6-15: 4 Set | 16-30: 3 Set | 31-40: 2 Set Portrait)</span>
                     </p>
                     <button onclick="window.print()" class="w-full bg-blue-500 text-white font-bold py-3 rounded-lg shadow hover:bg-blue-600 transition mb-4">
                         🖨️ Tekan Untuk Cetak
@@ -237,37 +233,69 @@
         }
 
         // ==========================================
-        // FUNGSI CETAK BORANG (GRID A4)
+        // FUNGSI CETAK BORANG (GRID A4 DINAMIK)
         // ==========================================
         function janaBorangCetak() {
             const bekas = document.getElementById('cetakan-kertas-container');
+            const labelOrientasi = document.getElementById('label-orientasi');
             bekas.innerHTML = '';
             
-            // Logik Grid: <= 5 soalan (6 Set), 6-15 soalan (4 Set), 16-40 soalan (3 Set)
+            // Logik Grid: <= 5 (6 Set), 6-15 (4 Set), 16-30 (3 Set), 31-40 (2 Set Portrait)
             let sets = 3;
             if (JUMLAH_SOALAN <= 5) {
                 sets = 6;
             } else if (JUMLAH_SOALAN <= 15) {
                 sets = 4;
+            } else if (JUMLAH_SOALAN <= 30) {
+                sets = 3;
+            } else {
+                sets = 2; // 31-40 soalan
             }
             
+            // Suntik @page style dinamik berdasarkan orientasi
+            let styleTag = document.getElementById('dynamic-print-style');
+            if (!styleTag) {
+                styleTag = document.createElement('style');
+                styleTag.id = 'dynamic-print-style';
+                document.head.appendChild(styleTag);
+            }
+
             if (sets === 6) {
+                styleTag.innerHTML = "@media print { @page { size: A4 landscape; margin: 10mm; } }";
+                labelOrientasi.innerText = "A4 Landscape";
                 bekas.className = "grid grid-cols-3 gap-4 print:gap-x-6 print:gap-y-6 w-full";
                 bekas.style.height = "18cm";
                 bekas.style.gridTemplateRows = "1fr 1fr";
             } else if (sets === 4) {
+                styleTag.innerHTML = "@media print { @page { size: A4 landscape; margin: 10mm; } }";
+                labelOrientasi.innerText = "A4 Landscape";
                 bekas.className = "grid grid-cols-4 gap-4 print:gap-4 w-full";
                 bekas.style.height = "18cm";
                 bekas.style.gridTemplateRows = "1fr";
-            } else {
+            } else if (sets === 3) {
+                styleTag.innerHTML = "@media print { @page { size: A4 landscape; margin: 10mm; } }";
+                labelOrientasi.innerText = "A4 Landscape";
                 bekas.className = "grid grid-cols-3 gap-4 print:gap-6 w-full";
                 bekas.style.height = "18cm";
+                bekas.style.gridTemplateRows = "1fr";
+            } else {
+                // Untuk 31-40 soalan, cetak dalam bentuk A4 Portrait (2 lajur)
+                styleTag.innerHTML = "@media print { @page { size: A4 portrait; margin: 10mm; } }";
+                labelOrientasi.innerText = "A4 Portrait";
+                bekas.className = "grid grid-cols-2 gap-4 print:gap-8 w-full";
+                bekas.style.height = "26cm"; // Ketinggian lebih panjang untuk portrait
                 bekas.style.gridTemplateRows = "1fr";
             }
 
             // NISBAH DINAMIK: Mengelakkan kotak menjadi kurus.
-            // Baris semakin rendah bila soalan banyak, tapi kelebaran kotak kekal cantik 100%.
             let ratio = JUMLAH_SOALAN <= 15 ? 10 : (JUMLAH_SOALAN <= 30 ? 7 : 5.5);
+
+            // Pengiraan Safe Max Width supaya tidak tumpah
+            let availableHeight = 520; 
+            if (sets === 6) availableHeight = 280;
+            if (sets === 2) availableHeight = 850; // Portrait mempunyai ruang tinggi yang banyak
+
+            let safeMaxWidth = Math.min(280, Math.floor(availableHeight / (JUMLAH_SOALAN * 0.12)));
 
             for (let s = 0; s < sets; s++) {
                 let divSet = document.createElement('div');
@@ -276,7 +304,6 @@
                 let soalanHtml = '';
                 for (let i = 0; i < JUMLAH_SOALAN; i++) {
                     
-                    // Skala bulatan bertukar kepada h-[75%] supaya bersandar pada ketinggian, mengelakkan tumpah.
                     let htmlBulatan = PILIHAN.map(p => `
                         <div class="flex-1 h-full flex items-center justify-center">
                             <div class="h-[75%] aspect-square border-[2px] border-black rounded-full flex items-center justify-center font-bold text-[8px] sm:text-[10px] text-gray-400">
@@ -310,8 +337,7 @@
                         Pastikan KOTAK HITAM di bawah masuk penuh dalam panduan kamera
                     </div>
                     
-                    <!-- Kotak soalan kini akan memanjang ke bawah tetapi mengekalkan kelebaran yang selesa -->
-                    <div class="w-full border-[2px] sm:border-[3px] border-black border-b-0 mx-auto" style="max-width: 95%;">
+                    <div class="w-full border-[2px] sm:border-[3px] border-black border-b-0 mx-auto" style="max-width: ${sets === 2 ? '85%' : '95%'};">
                         ${soalanHtml}
                     </div>
 
@@ -327,7 +353,7 @@
         // MATEMATIK GEOMETRI OMR (SELARAS DENGAN CETAKAN)
         // ==========================================
         function dapatkanGeometriOMR(cw, ch) {
-            let boxW = cw * 0.85; // Kotak ambil 85% lebar skrin
+            let boxW = cw * 0.85; 
             
             // Nisbah dinamik diselaraskan tepat dengan fungsi cetakan
             let ratio = JUMLAH_SOALAN <= 15 ? 0.10 : (JUMLAH_SOALAN <= 30 ? 0.07 : 0.055);
@@ -346,7 +372,7 @@
 
             // X offsets tepat di tengah slot 20% bagi setiap pilihan
             const posXPilihan = [
-                boxX + boxW * 0.30, // A (20% offset + 10%)
+                boxX + boxW * 0.30, // A 
                 boxX + boxW * 0.50, // B
                 boxX + boxW * 0.70, // C
                 boxX + boxW * 0.90  // D
