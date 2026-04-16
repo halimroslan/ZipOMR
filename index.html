@@ -9,7 +9,7 @@
         /* Tetapan CSS Khas Untuk Cetakan */
         @media print {
             @page {
-                margin: 1.5cm;
+                margin: 1cm;
             }
             body {
                 background-color: white !important;
@@ -18,7 +18,7 @@
             header, nav, .no-print, #tab-skema, #tab-imbas, #tab-keputusan {
                 display: none !important;
             }
-            /* Reset layout supaya OMR boleh ambil ruang penuh kertas */
+            /* Reset layout */
             .max-w-md, main, .min-h-screen {
                 max-width: 100% !important;
                 min-height: auto !important;
@@ -28,44 +28,19 @@
                 margin: 0 !important;
                 padding: 0 !important;
             }
-            /* Pastikan tab cetak dipaparkan */
             #tab-cetak {
                 display: block !important;
                 visibility: visible !important;
             }
-            /* Format kotak cetakan OMR */
-            .print-container {
-                border: 4px solid black !important;
-                padding: 30px !important;
-                margin: 0 auto !important;
-                width: 100% !important;
-                max-width: 100% !important;
-                box-sizing: border-box !important;
-            }
-            /* Paksa pelayar web kekalkan warna bulatan kelabu & border */
             * {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
         }
-
-        .omr-bubble {
-            width: 24px;
-            height: 24px;
-            border: 2px solid #000;
-            border-radius: 50%;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            font-weight: bold;
-            color: #ccc;
-        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans antialiased">
 
-    <!-- Buang kelas no-print di sini -->
     <div class="max-w-md mx-auto min-h-screen flex flex-col bg-white shadow-lg">
         <!-- Header -->
         <header class="bg-blue-600 text-white p-4 text-center shadow-md">
@@ -95,7 +70,6 @@
                 </div>
 
                 <h2 class="text-lg font-bold mb-4">Tetapkan Skema Jawapan</h2>
-                <p class="text-sm text-gray-600 mb-4">Sila pilih jawapan yang betul untuk soalan di bawah.</p>
                 <div id="borang-skema" class="space-y-3">
                     <!-- Javascript akan jana borang ni -->
                 </div>
@@ -106,31 +80,35 @@
 
             <!-- TAB: CETAK BORANG -->
             <div id="tab-cetak" class="tab-content hidden">
-                <div class="no-print mb-4">
+                <div class="no-print mb-4 text-center">
                     <h2 class="text-lg font-bold">Cetak Borang OMR</h2>
-                    <p class="text-sm text-gray-600 mb-4">Cetak borang ini dan berikan kepada pelajar. Minta mereka hitamkan bulatan sepenuhnya dengan pen/pensel gelap.</p>
+                    <p class="text-sm text-gray-600 mb-4">Borang telah diformat secara matematik. Klik butang di bawah untuk cetak.</p>
                     <button onclick="window.print()" class="w-full bg-blue-500 text-white font-bold py-3 rounded-lg shadow hover:bg-blue-600 transition mb-4">
                         🖨️ Tekan Untuk Cetak
                     </button>
                 </div>
 
-                <!-- Kawasan yang akan dicetak -->
-                <div id="kertas-omr" class="print-container border-4 border-black p-6 bg-white mx-auto" style="max-width: 400px;">
-                    <div class="text-center border-b-2 border-black pb-4 mb-4">
-                        <h2 class="text-xl font-bold uppercase tracking-wider">Kertas Jawapan</h2>
-                        <div class="flex justify-between mt-4 text-left">
+                <!-- KAWASAN CETAKAN -->
+                <div id="kertas-omr" class="bg-white mx-auto" style="max-width: 500px;">
+                    <div class="text-center pb-4 mb-4 border-b-2 border-black">
+                        <h2 class="text-xl font-bold uppercase tracking-wider">Kertas Jawapan OMR</h2>
+                        <div class="flex justify-between mt-4 text-left text-sm font-bold">
                             <div>Nama: _____________________</div>
                             <div>Kelas: _________</div>
                         </div>
                     </div>
+
+                    <div class="text-center font-bold text-xs mb-2 text-gray-700 uppercase">
+                        Sila pastikan KOTAK HITAM soalan di bawah masuk penuh dalam panduan kamera
+                    </div>
                     
-                    <!-- Grid Soalan untuk Cetakan -->
-                    <div id="grid-cetak" class="flex flex-col gap-2">
+                    <!-- Grid Soalan untuk Cetakan (Strict Mathematics) -->
+                    <div id="grid-cetak" class="w-full border-4 border-black border-b-0 mx-auto">
                         <!-- Jana guna JS -->
                     </div>
 
-                    <div class="mt-8 text-center text-xs text-gray-500">
-                        * Hitamkan bulatan penuh-penuh. Jangan pangkah atau tick.
+                    <div class="mt-4 text-center text-xs font-bold text-gray-700">
+                        * Hitamkan bulatan gelap-gelap. Jangan tanda rupa X atau tick (✓).
                     </div>
                 </div>
             </div>
@@ -138,15 +116,15 @@
             <!-- TAB: IMBAS (KAMERA) -->
             <div id="tab-imbas" class="tab-content hidden flex-col">
                 <h2 class="text-lg font-bold mb-2">Imbas Jawapan Pelajar</h2>
-                <p class="text-sm text-gray-600 mb-4">Pastikan kotak hitam pada borang masuk <b>ngam-ngam</b> dalam petak merah di bawah. Kawasan mesti terang.</p>
+                <p class="text-sm text-gray-600 mb-4">Selaraskan <b class="text-red-600">kotak hitam soalan</b> dan bulatan pada kertas tepat-tepat dengan panduan merah di skrin.</p>
                 
-                <!-- Diperbaiki: Ditambah w-full, h-[60vh], dan min-h supaya sentiasa besar dan tak collapse -->
-                <div class="relative w-full h-[60vh] min-h-[350px] bg-black rounded-lg overflow-hidden flex items-center justify-center">
-                    <video id="kamera" class="absolute inset-0 w-full h-full object-cover" autoplay playsinline></video>
-                    
-                    <!-- Petak Panduan (Alignment Guide) -->
-                    <div id="petak-panduan" class="absolute border-4 border-red-500 shadow-[0_0_0_999px_rgba(0,0,0,0.5)] z-10 box-border pointer-events-none" style="width: 80%; height: 80%; top: 10%; left: 10%;">
-                    </div>
+                <div class="relative w-full h-[60vh] min-h-[350px] bg-gray-900 rounded-lg overflow-hidden flex items-center justify-center shadow-inner border border-gray-300">
+                    <!-- Hidden video -->
+                    <video id="kamera" class="hidden" autoplay playsinline></video>
+                    <!-- Video frame render -->
+                    <canvas id="canvas-video" class="absolute inset-0 w-full h-full"></canvas>
+                    <!-- Ghost Guides -->
+                    <canvas id="canvas-overlay" class="absolute inset-0 w-full h-full pointer-events-none z-10"></canvas>
                 </div>
 
                 <div class="mt-4 flex gap-2">
@@ -159,7 +137,7 @@
                 </div>
             </div>
 
-            <!-- TAB: KEPUTUSAN (Tersembunyi asalnya) -->
+            <!-- TAB: KEPUTUSAN -->
             <div id="tab-keputusan" class="tab-content hidden">
                 <h2 class="text-2xl font-bold text-center mb-2">Keputusan</h2>
                 
@@ -170,7 +148,7 @@
                 </div>
 
                 <h3 class="font-bold mb-3 border-b pb-1">Analisis Imej</h3>
-                <p class="text-xs text-gray-500 mb-2">Titik hijau/merah menunjukkan tempat kamera membaca bulatan.</p>
+                <p class="text-xs text-gray-500 mb-2">Hijau (Dikesan/Betul), Merah (Kosong), Oren (Batal/Double mark).</p>
                 <div class="border-2 border-gray-300 rounded overflow-hidden bg-gray-100">
                     <canvas id="canvas-debug" class="w-full h-auto"></canvas>
                 </div>
@@ -195,23 +173,16 @@
         const PILIHAN = ['A', 'B', 'C', 'D'];
         let skemaJawapan = Array(JUMLAH_SOALAN).fill(null);
         let streamKamera = null;
+        let gelungKamera = null;
 
         function kemaskiniJumlahSoalan() {
             let inputEl = document.getElementById('input-jumlah-soalan');
             let nilai = parseInt(inputEl.value);
             
-            if (isNaN(nilai) || nilai < 1) {
-                nilai = 1;
-                inputEl.value = 1;
-            } else if (nilai > 40) {
-                nilai = 40;
-                inputEl.value = 40;
-                alert("Maksimum 40 soalan dibenarkan supaya muat untuk dicetak pada satu muka surat.");
-            }
+            if (isNaN(nilai) || nilai < 1) { nilai = 1; inputEl.value = 1; }
+            else if (nilai > 40) { nilai = 40; inputEl.value = 40; alert("Maksimum 40 soalan dibenarkan."); }
             
             JUMLAH_SOALAN = nilai;
-            
-            // Pindahkan jawapan lama ke array baru supaya tak hilang jika cikgu dah isi
             let skemaBaru = Array(JUMLAH_SOALAN).fill(null);
             for(let i = 0; i < Math.min(skemaJawapan.length, JUMLAH_SOALAN); i++) {
                 skemaBaru[i] = skemaJawapan[i];
@@ -222,7 +193,6 @@
             janaBorangCetak();
         }
 
-        // Inisialisasi bila muka surat dibuka
         document.addEventListener('DOMContentLoaded', () => {
             janaBorangSkema();
             janaBorangCetak();
@@ -232,31 +202,21 @@
         // FUNGSI UI & NAVIGASI
         // ==========================================
         function tukarTab(idTab) {
-            // Sembunyikan semua tab
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            
-            // Reset warna butang nav
             document.querySelectorAll('nav button').forEach(el => {
                 el.classList.remove('text-blue-600', 'border-blue-600');
                 el.classList.add('text-gray-500', 'border-transparent');
             });
 
-            // Tunjuk tab yang dipilih
             document.getElementById('tab-' + idTab).classList.remove('hidden');
-            
-            // Highlight butang (kecuali untuk keputusan)
             let navBtn = document.getElementById('nav-' + idTab);
             if(navBtn) {
                 navBtn.classList.remove('text-gray-500', 'border-transparent');
                 navBtn.classList.add('text-blue-600', 'border-blue-600');
             }
 
-            // Urus kamera - tutup kamera kalau bukan di tab imbas untuk jimat bateri
             if (idTab === 'imbas') {
-                // Beri sedikit masa (delay) untuk kotak tu buka betul-betul sebelum on kamera
-                setTimeout(() => {
-                    mulakanKamera();
-                }, 100);
+                setTimeout(() => mulakanKamera(), 100);
             } else {
                 hentikanKamera();
             }
@@ -268,40 +228,30 @@
         function janaBorangSkema() {
             const bekas = document.getElementById('borang-skema');
             bekas.innerHTML = '';
-            
             for (let i = 0; i < JUMLAH_SOALAN; i++) {
                 let divSoalan = document.createElement('div');
                 divSoalan.className = "flex items-center justify-between bg-white p-3 rounded border shadow-sm";
-                
                 let htmlRadio = PILIHAN.map(p => `
                     <label class="flex items-center space-x-1 cursor-pointer">
-                        <input type="radio" name="soalan_${i}" value="${p}" class="w-5 h-5 text-blue-600 focus:ring-blue-500" ${skemaJawapan[i] === p ? 'checked' : ''} onchange="setJawapan(${i}, '${p}')">
+                        <input type="radio" name="soalan_${i}" value="${p}" class="w-5 h-5 text-blue-600" ${skemaJawapan[i] === p ? 'checked' : ''} onchange="skemaJawapan[${i}] = '${p}'">
                         <span class="font-medium text-gray-700">${p}</span>
                     </label>
                 `).join('');
-
-                divSoalan.innerHTML = `
-                    <div class="font-bold text-gray-700 w-8">${i + 1}.</div>
-                    <div class="flex space-x-4">${htmlRadio}</div>
-                `;
+                divSoalan.innerHTML = `<div class="font-bold text-gray-700 w-8">${i + 1}.</div><div class="flex space-x-4">${htmlRadio}</div>`;
                 bekas.appendChild(divSoalan);
             }
         }
 
-        function setJawapan(indeks, pilihan) {
-            skemaJawapan[indeks] = pilihan;
-        }
-
         function simpanSkema() {
             if (skemaJawapan.includes(null)) {
-                alert("Cikgu, ada soalan yang belum disetkan jawapannya tu!");
+                alert("Cikgu, ada soalan yang belum disetkan jawapannya!");
                 return;
             }
-            alert("Skema jawapan berjaya disimpan! Cikgu boleh mula mencetak atau mengimbas.");
+            alert("Skema jawapan berjaya disimpan!");
         }
 
         // ==========================================
-        // FUNGSI CETAK BORANG
+        // FUNGSI CETAK BORANG (PERFECT MATH)
         // ==========================================
         function janaBorangCetak() {
             const bekas = document.getElementById('grid-cetak');
@@ -309,15 +259,22 @@
             
             for (let i = 0; i < JUMLAH_SOALAN; i++) {
                 let divBaris = document.createElement('div');
-                divBaris.className = "flex items-center py-1";
+                // Menggunakan padding-top trick untuk memaksa Aspect Ratio 10 : 1.2
+                // Bermaksud tinggi baris adalah TEPAT 12% daripada lebar borang
+                divBaris.className = "w-full relative border-b-4 border-black box-border bg-white";
+                divBaris.style.paddingTop = "12%"; 
                 
                 let htmlBulatan = PILIHAN.map(p => `
-                    <div class="omr-bubble mx-1">${p}</div>
+                    <div class="w-[20%] h-full flex items-center justify-center">
+                        <div class="w-[60%] aspect-square border-[3px] border-black rounded-full flex items-center justify-center font-bold text-xs text-gray-400">
+                            ${p}
+                        </div>
+                    </div>
                 `).join('');
 
                 divBaris.innerHTML = `
-                    <div class="font-bold w-8 text-right pr-2">${i + 1}.</div>
-                    <div class="flex-1 flex justify-around pl-4 border-l-2 border-dashed border-gray-300">
+                    <div class="absolute inset-0 flex w-full h-full">
+                        <div class="w-[20%] h-full flex items-center justify-end pr-4 font-bold border-r-4 border-black text-lg">${i + 1}.</div>
                         ${htmlBulatan}
                     </div>
                 `;
@@ -326,31 +283,55 @@
         }
 
         // ==========================================
-        // FUNGSI KAMERA & IMBASAN (OMR ASAS)
+        // MATEMATIK GEOMETRI OMR
+        // ==========================================
+        function dapatkanGeometriOMR(cw, ch) {
+            let boxW = cw * 0.85; // Kotak ambil 85% lebar skrin
+            let rowHeight = boxW * 0.12; // MESTI SAMA DENGAN padding-top 12% di kod cetakan
+            let boxH = rowHeight * JUMLAH_SOALAN;
+
+            // Kalau soalan terlampau banyak, kecilkan kotak supaya muat dalam skrin telefon
+            if (boxH > ch * 0.85) {
+                boxH = ch * 0.85;
+                rowHeight = boxH / JUMLAH_SOALAN;
+                boxW = rowHeight / 0.12;
+            }
+
+            const boxX = (cw - boxW) / 2;
+            const boxY = (ch - boxH) / 2;
+
+            // Posisi tepat X berdasarkan w-[20%] di cetakan
+            // Kolum nombor=20%, A=20%, B=20%, C=20%, D=20%. Titik tengah = 20% + separuh saiz (10%)
+            const posXPilihan = [
+                boxX + boxW * 0.30, // A
+                boxX + boxW * 0.50, // B
+                boxX + boxW * 0.70, // C
+                boxX + boxW * 0.90  // D
+            ];
+
+            return { boxX, boxY, boxW, boxH, rowHeight, posXPilihan };
+        }
+
+        // ==========================================
+        // FUNGSI KAMERA OVERLAY VISUAL
         // ==========================================
         async function mulakanKamera() {
             const video = document.getElementById('kamera');
-            
-            // Jika stream dah jalan, kita pastikan dia 'play' saja
             if (streamKamera) {
-                video.play().catch(e => console.log("Isu video play:", e));
+                video.play().catch(e => console.log(e));
+                renderFrameKamera();
                 return;
             }
 
             try {
-                // Minta kamera belakang (environment)
                 streamKamera = await navigator.mediaDevices.getUserMedia({ 
                     video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } } 
                 });
                 video.srcObject = streamKamera;
-                
-                // DI PERBAIKI: Paksa browser play video stream tu. 
-                // Sangat penting untuk peranti mobile seperti iPhone.
                 await video.play();
-
+                renderFrameKamera();
             } catch (err) {
-                console.error("Ralat kamera:", err);
-                alert("Tak dapat buka kamera. Pastikan cikgu benarkan akses kamera untuk laman web ni.");
+                alert("Tak dapat buka kamera.");
             }
         }
 
@@ -360,156 +341,199 @@
                 streamKamera = null;
                 document.getElementById('kamera').srcObject = null;
             }
+            if(gelungKamera) cancelAnimationFrame(gelungKamera);
         }
 
-        function tangkapDanTanda() {
-            if (skemaJawapan.includes(null)) {
-                alert("Cikgu belum siapkan skema jawapan! Sila ke tab 'Skema' dahulu.");
-                return;
-            }
+        function renderFrameKamera() {
+            if (!streamKamera) return;
 
             const video = document.getElementById('kamera');
-            if (!video.videoWidth) {
-                alert("Kamera belum bersedia. Sila tekan 'Buka Kamera' atau tunggu sebentar.");
+            const cvsVideo = document.getElementById('canvas-video');
+            const cvsOverlay = document.getElementById('canvas-overlay');
+
+            // Sync saiz canvas dengan saiz sebenar paparan
+            if (cvsVideo.width !== cvsVideo.clientWidth) {
+                cvsVideo.width = cvsVideo.clientWidth;
+                cvsVideo.height = cvsVideo.clientHeight;
+                cvsOverlay.width = cvsOverlay.clientWidth;
+                cvsOverlay.height = cvsOverlay.clientHeight;
+            }
+
+            const cw = cvsVideo.width;
+            const ch = cvsVideo.height;
+            const vw = video.videoWidth;
+            const vh = video.videoHeight;
+
+            if (vw && vh) {
+                const ctxV = cvsVideo.getContext('2d', { willReadFrequently: true });
+                const ctxO = cvsOverlay.getContext('2d');
+                
+                // Draw live video secara "object-cover" (penuh ruang)
+                const scale = Math.max(cw / vw, ch / vh);
+                const drawW = vw * scale;
+                const drawH = vh * scale;
+                const drawX = (cw - drawW) / 2;
+                const drawY = (ch - drawH) / 2;
+                ctxV.drawImage(video, drawX, drawY, drawW, drawH);
+
+                // Draw alignment panduan (Merah & Putih)
+                lukisPanduan(ctxO, cw, ch);
+            }
+            
+            gelungKamera = requestAnimationFrame(renderFrameKamera);
+        }
+
+        function lukisPanduan(ctx, cw, ch) {
+            ctx.clearRect(0, 0, cw, ch);
+            const geo = dapatkanGeometriOMR(cw, ch);
+
+            // Gelapkan luar kotak supaya fokus
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+            ctx.fillRect(0, 0, cw, ch);
+            ctx.clearRect(geo.boxX, geo.boxY, geo.boxW, geo.boxH);
+
+            // Kotak Luar Merah (Suruh cikgu align sini)
+            ctx.strokeStyle = '#ef4444'; 
+            ctx.lineWidth = 4;
+            ctx.strokeRect(geo.boxX, geo.boxY, geo.boxW, geo.boxH);
+
+            // Lukis bayang bulatan dan grid line
+            const r = geo.boxW * 0.035; // Saiz bulatan ghost
+            
+            for (let i = 0; i < JUMLAH_SOALAN; i++) {
+                let cy = geo.boxY + (i * geo.rowHeight) + (geo.rowHeight / 2);
+                
+                // Garisan Pemisah Baris
+                if (i > 0) {
+                    ctx.beginPath();
+                    ctx.moveTo(geo.boxX, geo.boxY + (i * geo.rowHeight));
+                    ctx.lineTo(geo.boxX + geo.boxW, geo.boxY + (i * geo.rowHeight));
+                    ctx.strokeStyle = 'rgba(239, 68, 68, 0.3)';
+                    ctx.stroke();
+                }
+
+                // Bulatan Pilihan
+                for (let j = 0; j < 4; j++) {
+                    let cx = geo.posXPilihan[j];
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, r, 0, 2*Math.PI);
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+                    ctx.stroke();
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+                    ctx.fill();
+                }
+            }
+        }
+
+        // ==========================================
+        // FUNGSI IMBAS DAN ANALISIS
+        // ==========================================
+        function tangkapDanTanda() {
+            if (skemaJawapan.includes(null)) {
+                alert("Cikgu belum siapkan skema jawapan!");
                 return;
             }
 
-            // Buat canvas sementara untuk tangkap imej penuh dari video
-            const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            const ctx = canvas.getContext('2d', { willReadFrequently: true });
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const cvsVideo = document.getElementById('canvas-video');
+            if (!cvsVideo.width) return;
 
-            // Analisis Imej
-            analisisImej(canvas);
+            // Berhenti kemaskini live frame, kita akan analisis frame semasa
+            if(gelungKamera) cancelAnimationFrame(gelungKamera);
+            analisisImej(cvsVideo);
         }
 
         function analisisImej(sumberCanvas) {
-            const ctx = sumberCanvas.getContext('2d');
+            const ctx = sumberCanvas.getContext('2d', { willReadFrequently: true });
             const cw = sumberCanvas.width;
             const ch = sumberCanvas.height;
+            const geo = dapatkanGeometriOMR(cw, ch);
 
-            // Kita assume kotak panduan merah adalah pada: top: 10%, left: 10%, w: 80%, h: 80% (rujuk CSS style)
-            // Ini bermaksud kertas OMR patut berada dalam kawasan piksel ini:
-            const boxX = cw * 0.10;
-            const boxY = ch * 0.10;
-            const boxW = cw * 0.80;
-            const boxH = ch * 0.80;
-
-            // Susunan geografi borang cetakan kita (secara peratusan kasar dari kotak borang)
-            // Ketinggian Header (Nama dll) lebih kurang 20% dari atas
-            const headerOffsetP = 0.22; 
-            const ruangSoalanH = boxH * (1 - headerOffsetP);
-            const mulaY = boxY + (boxH * headerOffsetP);
-            
-            const jarakBaris = ruangSoalanH / JUMLAH_SOALAN;
-            
-            // X offset untuk A, B, C, D (berdasarkan rupa grid cetak tadi)
-            // Kotak nombor ambil ~15% ruang kiri, border dash. Pilihan bermula dari ~25% hingga 90%
-            const posXPilihan = [
-                boxX + boxW * 0.30, // A
-                boxX + boxW * 0.50, // B
-                boxX + boxW * 0.70, // C
-                boxX + boxW * 0.90  // D
-            ];
-
-            let markah = 0;
-            let butiran = [];
-            let markahDikesan = [];
-
-            // Sediakan debug canvas untuk tunjuk apa yang sistem nampak
             const canvasDebug = document.getElementById('canvas-debug');
             canvasDebug.width = cw;
             canvasDebug.height = ch;
             const ctxDebug = canvasDebug.getContext('2d');
             ctxDebug.drawImage(sumberCanvas, 0, 0);
-            
-            // Lukis kotak tekaan
-            ctxDebug.strokeStyle = "yellow";
-            ctxDebug.lineWidth = 4;
-            ctxDebug.strokeRect(boxX, boxY, boxW, boxH);
 
-            // Loop setiap soalan dan pilihan untuk periksa kegelapan piksel
+            // Tunjuk balik kotak dikesan di keputusan
+            ctxDebug.strokeStyle = "yellow";
+            ctxDebug.lineWidth = 3;
+            ctxDebug.strokeRect(geo.boxX, geo.boxY, geo.boxW, geo.boxH);
+
+            let markah = 0;
+            let butiran = [];
+            const r = geo.boxW * 0.035; // Sampling radius
+
             for (let i = 0; i < JUMLAH_SOALAN; i++) {
-                let cy = mulaY + (i * jarakBaris) + (jarakBaris / 2);
+                let cy = geo.boxY + (i * geo.rowHeight) + (geo.rowHeight / 2);
                 let tahapKegelapan = [];
-                let pilihanPelajar = null;
                 
                 for (let j = 0; j < PILIHAN.length; j++) {
-                    let cx = posXPilihan[j];
-                    
-                    // Saiz kawasan pensampelan (sampling area)
-                    let r = boxW * 0.02; // 2% lebar kotak
-                    
-                    // Dapatkan data piksel dalam bulatan kecil di (cx, cy)
+                    let cx = geo.posXPilihan[j];
                     let imgData = ctx.getImageData(cx - r, cy - r, r*2, r*2);
                     let pixels = imgData.data;
                     let totalBrightness = 0;
-                    
-                    // Kira purata kecerahan (brightness)
+
                     for (let p = 0; p < pixels.length; p += 4) {
-                        let red = pixels[p];
-                        let green = pixels[p+1];
-                        let blue = pixels[p+2];
-                        // Formula luminan standard
-                        let brightness = (0.299 * red + 0.587 * green + 0.114 * blue);
+                        // luminance standard
+                        let brightness = (0.299 * pixels[p] + 0.587 * pixels[p+1] + 0.114 * pixels[p+2]);
                         totalBrightness += brightness;
                     }
                     let avgBrightness = totalBrightness / (pixels.length / 4);
                     tahapKegelapan.push(avgBrightness);
-
-                    // Debug: Lukis titik ujian di canvas
-                    ctxDebug.beginPath();
-                    ctxDebug.arc(cx, cy, r, 0, 2 * Math.PI);
-                    // Kalau gelap (nilai brightness rendah, let say < 130), kaler hijau
-                    if (avgBrightness < 130) {
-                        ctxDebug.fillStyle = "rgba(0, 255, 0, 0.5)";
-                    } else {
-                        ctxDebug.fillStyle = "rgba(255, 0, 0, 0.3)";
-                    }
-                    ctxDebug.fill();
-                    ctxDebug.stroke();
                 }
 
-                // Cari bulatan yang paling gelap
-                let nilaiPalingGelap = Math.min(...tahapKegelapan);
+                // TEKNIK KONTRAST DINAMIK (Bukan lagi threshold tetap)
+                // 1. Susun kecerahan dari paling gelap ke paling cerah
+                let sortedBright = [...tahapKegelapan].sort((a,b) => a - b);
                 
-                // Threshold: adakah ia cukup gelap untuk dikira sebagai "dihitamkan"?
-                // Jika kurang dari 130 (0=hitam pekat, 255=putih bersih), kita anggap ditanda.
-                if (nilaiPalingGelap < 130) {
-                    let indeksJawapan = tahapKegelapan.indexOf(nilaiPalingGelap);
+                // 2. Ambil purata 3 bulatan cerah sebagai "Warna Kertas Latar"
+                let avgPaper = (sortedBright[1] + sortedBright[2] + sortedBright[3]) / 3;
+                
+                // 3. Syarat: Perbezaan mesti lebih 25 mata contrast untuk dikira "Ditanda"
+                let thresholdContrast = 25; 
+                let pilihanPelajar = null;
+
+                if ((avgPaper - sortedBright[0]) > thresholdContrast) {
+                    let indeksJawapan = tahapKegelapan.indexOf(sortedBright[0]);
                     pilihanPelajar = PILIHAN[indeksJawapan];
                     
-                    // Semak jika ada lebih dari 1 bulatan yang dihitamkan (double mark)
-                    let countGelap = tahapKegelapan.filter(b => b < 130).length;
-                    if (countGelap > 1) {
-                        pilihanPelajar = "BATAL"; // Tandakan sebagai batal
+                    // Semak Double Mark (Kalau bulatan ke-2 paling gelap pun berdekatan markah bulatan pertama)
+                    if ((avgPaper - sortedBright[1]) > thresholdContrast) {
+                        pilihanPelajar = "BATAL"; 
                     }
                 }
 
-                // Semak betul atau salah
-                let betul = false;
-                let jawapanSebenar = skemaJawapan[i];
-                if (pilihanPelajar === jawapanSebenar) {
-                    betul = true;
-                    markah++;
+                // LUKISAN DEBUG di Kanvas Keputusan
+                for (let j = 0; j < PILIHAN.length; j++) {
+                    let cx = geo.posXPilihan[j];
+                    ctxDebug.beginPath();
+                    ctxDebug.arc(cx, cy, r, 0, 2 * Math.PI);
+                    
+                    if (PILIHAN[j] === pilihanPelajar) {
+                        ctxDebug.fillStyle = "rgba(0, 255, 0, 0.6)"; // Hijau tanda dikesan
+                        ctxDebug.fill();
+                    } else if (pilihanPelajar === "BATAL" && (avgPaper - tahapKegelapan[j]) > thresholdContrast) {
+                        ctxDebug.fillStyle = "rgba(255, 165, 0, 0.6)"; // Oren kalau batal
+                        ctxDebug.fill();
+                    } else {
+                        ctxDebug.strokeStyle = "rgba(255, 0, 0, 0.5)"; // Merah kalau tak dikesan
+                        ctxDebug.stroke();
+                    }
                 }
 
-                butiran.push({
-                    soalan: i + 1,
-                    jawapanPelajar: pilihanPelajar || 'KOSONG',
-                    jawapanSebenar: jawapanSebenar,
-                    betul: betul
-                });
+                // Pemarkahan
+                let betul = false;
+                let jawapanSebenar = skemaJawapan[i];
+                if (pilihanPelajar === jawapanSebenar) { betul = true; markah++; }
+
+                butiran.push({ soalan: i + 1, jawapanPelajar: pilihanPelajar || 'KOSONG', jawapanSebenar: jawapanSebenar, betul: betul });
             }
 
             paparKeputusan(markah, butiran);
         }
 
         function paparKeputusan(markah, butiran) {
-            tukarTab('keputusan'); // Tukar ke tab hasil, ini akan tutup kamera automatik
-
+            tukarTab('keputusan'); 
             let peratus = (markah / JUMLAH_SOALAN) * 100;
             document.getElementById('skor-markah').innerText = `${markah}/${JUMLAH_SOALAN}`;
             document.getElementById('skor-peratus').innerText = `${peratus.toFixed(0)}%`;
@@ -525,10 +549,8 @@
                     </div>
                 `;
             }).join('');
-
             document.getElementById('senarai-keputusan').innerHTML = senaraiHtml;
         }
-
     </script>
 </body>
 </html>
