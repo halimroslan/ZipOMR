@@ -269,13 +269,13 @@
             }
 
             // PENGIRAAN MATEMATIK SELAMAT (Safe Max Width)
-            // Supaya kotak OMR tidak melebihi tinggi ruang yang ada dan merosakkan layout A4.
-            let availableHeight = (sets === 6) ? 350 : 680; 
-            let safeMaxWidth = Math.min(280, Math.floor(availableHeight / (JUMLAH_SOALAN * 0.12)));
+            // Dikurangkan nilai availableHeight supaya kotak OMR tidak terkeluar (overflow) ke muka surat 2.
+            let availableHeight = (sets === 6) ? 280 : 520; 
+            let safeMaxWidth = Math.min(260, Math.floor(availableHeight / (JUMLAH_SOALAN * 0.12)));
 
             for (let s = 0; s < sets; s++) {
                 let divSet = document.createElement('div');
-                divSet.className = "bg-white flex flex-col justify-start border border-gray-300 print:border-none p-2 print:p-0 overflow-hidden";
+                divSet.className = "bg-white flex flex-col justify-start border border-gray-300 print:border-none p-2 print:p-0 overflow-hidden break-inside-avoid print:break-inside-avoid";
                 
                 let soalanHtml = '';
                 for (let i = 0; i < JUMLAH_SOALAN; i++) {
