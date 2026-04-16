@@ -290,17 +290,18 @@
             // NISBAH DINAMIK: Mengelakkan kotak menjadi kurus.
             let ratio = JUMLAH_SOALAN <= 15 ? 10 : (JUMLAH_SOALAN <= 30 ? 7 : 6.5);
 
-            // Pengiraan Safe Max Width supaya tidak tumpah
+            // PENGIRAAN SAFE MAX WIDTH BARU SUPAYA TAK MELIMPAH
             let availableHeight = 520; 
             if (sets === 6) availableHeight = 280;
-            if (sets === 2) availableHeight = 900; // Portrait mempunyai ruang tinggi yang banyak (A4 ~ 1046px - margin)
+            // Di kurangkan dari 900 kepada 780 untuk elak melimpah ke page 2
+            if (sets === 2) availableHeight = 780; 
 
             let actualRatio = ratio / 100;
             let safeMaxWidth = Math.floor(availableHeight / (JUMLAH_SOALAN * actualRatio));
             
             // Hadkan saiz maksimum secara mendatar supaya kemas
             if (sets === 2) {
-                safeMaxWidth = Math.min(380, safeMaxWidth); // Portrait boleh lebih lebar
+                safeMaxWidth = Math.min(320, safeMaxWidth); // Portrait boleh lebih lebar sikit
             } else {
                 safeMaxWidth = Math.min(280, safeMaxWidth); // Landscape perlu terhad
             }
