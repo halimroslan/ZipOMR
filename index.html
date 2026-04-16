@@ -9,7 +9,7 @@
         /* Tetapan CSS Khas Untuk Cetakan */
         @media print {
             @page {
-                size: A4 portrait;
+                size: A4 landscape;
                 margin: 10mm; /* Margin selamat 1cm */
             }
             body {
@@ -85,8 +85,8 @@
                 <div class="no-print mb-4 text-center shrink-0">
                     <h2 class="text-lg font-bold">Cetak Borang OMR</h2>
                     <p class="text-sm text-gray-600 mb-4">
-                        Format automatik <b>A4 Portrait</b>.<br>
-                        <span class="text-xs">(1-10 soalan: 4 set per muka surat | 11-40 soalan: 2 set per muka surat)</span>
+                        Format automatik <b>A4 Landscape</b>.<br>
+                        <span class="text-xs">(1-5 soalan: 6 set per muka surat | 6-15 soalan: 4 set per muka surat | 16-40 soalan: 2 set per muka surat)</span>
                     </p>
                     <button onclick="window.print()" class="w-full bg-blue-500 text-white font-bold py-3 rounded-lg shadow hover:bg-blue-600 transition mb-4">
                         🖨️ Tekan Untuk Cetak
@@ -243,25 +243,35 @@
             const bekas = document.getElementById('cetakan-kertas-container');
             bekas.innerHTML = '';
             
-            // Logik Grid: <= 10 soalan (4 Set), > 10 soalan (2 Set)
-            let sets = JUMLAH_SOALAN <= 10 ? 4 : 2;
+            // Logik Grid: <= 5 soalan (6 Set), 6-15 soalan (4 Set), 16-40 soalan (2 Set)
+            let sets = 2;
+            if (JUMLAH_SOALAN <= 5) {
+                sets = 6;
+            } else if (JUMLAH_SOALAN <= 15) {
+                sets = 4;
+            }
             
-            if (sets === 4) {
-                // 2 Lajur, 2 Baris. Tinggi di set supaya muat 1 muka surat A4
-                bekas.className = "grid grid-cols-2 gap-4 print:gap-x-8 print:gap-y-8 w-full";
-                bekas.style.height = "27cm";
+            if (sets === 6) {
+                // 3 Lajur, 2 Baris. Landscape.
+                bekas.className = "grid grid-cols-3 gap-4 print:gap-x-6 print:gap-y-6 w-full";
+                bekas.style.height = "18cm";
                 bekas.style.gridTemplateRows = "1fr 1fr";
+            } else if (sets === 4) {
+                // 4 Lajur, 1 Baris. Landscape.
+                bekas.className = "grid grid-cols-4 gap-4 print:gap-4 w-full";
+                bekas.style.height = "18cm";
+                bekas.style.gridTemplateRows = "1fr";
             } else {
-                // 2 Lajur, 1 Baris (Memanjang ke bawah)
-                bekas.className = "grid grid-cols-2 gap-4 print:gap-8 w-full";
-                bekas.style.height = "27cm";
+                // 2 Lajur, 1 Baris. Landscape.
+                bekas.className = "grid grid-cols-2 gap-6 print:gap-8 w-full";
+                bekas.style.height = "18cm";
                 bekas.style.gridTemplateRows = "1fr";
             }
 
             // PENGIRAAN MATEMATIK SELAMAT (Safe Max Width)
             // Supaya kotak OMR tidak melebihi tinggi ruang yang ada dan merosakkan layout A4.
-            let availableHeight = (sets === 4) ? 370 : 880; 
-            let safeMaxWidth = Math.min(300, Math.floor(availableHeight / (JUMLAH_SOALAN * 0.12)));
+            let availableHeight = (sets === 6) ? 350 : 680; 
+            let safeMaxWidth = Math.min(280, Math.floor(availableHeight / (JUMLAH_SOALAN * 0.12)));
 
             for (let s = 0; s < sets; s++) {
                 let divSet = document.createElement('div');
@@ -271,7 +281,7 @@
                 for (let i = 0; i < JUMLAH_SOALAN; i++) {
                     let htmlBulatan = PILIHAN.map(p => `
                         <div class="w-[20%] h-full flex items-center justify-center">
-                            <div class="w-[60%] aspect-square border-[3px] border-black rounded-full flex items-center justify-center font-bold text-[8px] sm:text-xs text-gray-400">
+                            <div class="w-[40%] aspect-square border-[3px] border-black rounded-full flex items-center justify-center font-bold text-[8px] sm:text-[10px] text-gray-400">
                                 ${p}
                             </div>
                         </div>
@@ -429,7 +439,7 @@
             ctx.strokeRect(geo.boxX, geo.boxY, geo.boxW, geo.boxH);
 
             // Lukis bayang bulatan dan grid line
-            const r = geo.boxW * 0.035; // Saiz bulatan ghost
+            const r = geo.boxW * 0.04; // Saiz bulatan ghost (diselaraskan dengan saiz baru cetakan)
             
             for (let i = 0; i < JUMLAH_SOALAN; i++) {
                 let cy = geo.boxY + (i * geo.rowHeight) + (geo.rowHeight / 2);
@@ -492,7 +502,7 @@
 
             let markah = 0;
             let butiran = [];
-            const r = geo.boxW * 0.035; // Sampling radius
+            const r = geo.boxW * 0.03; // Sampling radius dikecilkan supaya muat dalam bulatan jawapan baru
 
             for (let i = 0; i < JUMLAH_SOALAN; i++) {
                 let cy = geo.boxY + (i * geo.rowHeight) + (geo.rowHeight / 2);
