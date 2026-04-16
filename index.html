@@ -288,14 +288,22 @@
             }
 
             // NISBAH DINAMIK: Mengelakkan kotak menjadi kurus.
-            let ratio = JUMLAH_SOALAN <= 15 ? 10 : (JUMLAH_SOALAN <= 30 ? 7 : 5.5);
+            let ratio = JUMLAH_SOALAN <= 15 ? 10 : (JUMLAH_SOALAN <= 30 ? 7 : 6.5);
 
             // Pengiraan Safe Max Width supaya tidak tumpah
             let availableHeight = 520; 
             if (sets === 6) availableHeight = 280;
-            if (sets === 2) availableHeight = 850; // Portrait mempunyai ruang tinggi yang banyak
+            if (sets === 2) availableHeight = 900; // Portrait mempunyai ruang tinggi yang banyak (A4 ~ 1046px - margin)
 
-            let safeMaxWidth = Math.min(280, Math.floor(availableHeight / (JUMLAH_SOALAN * 0.12)));
+            let actualRatio = ratio / 100;
+            let safeMaxWidth = Math.floor(availableHeight / (JUMLAH_SOALAN * actualRatio));
+            
+            // Hadkan saiz maksimum secara mendatar supaya kemas
+            if (sets === 2) {
+                safeMaxWidth = Math.min(380, safeMaxWidth); // Portrait boleh lebih lebar
+            } else {
+                safeMaxWidth = Math.min(280, safeMaxWidth); // Landscape perlu terhad
+            }
 
             for (let s = 0; s < sets; s++) {
                 let divSet = document.createElement('div');
@@ -304,9 +312,10 @@
                 let soalanHtml = '';
                 for (let i = 0; i < JUMLAH_SOALAN; i++) {
                     
+                    // Besarkan bulatan ke 85% untuk mengisi baris supaya tidak nampak halus
                     let htmlBulatan = PILIHAN.map(p => `
                         <div class="flex-1 h-full flex items-center justify-center">
-                            <div class="h-[75%] aspect-square border-[2px] border-black rounded-full flex items-center justify-center font-bold text-[8px] sm:text-[10px] text-gray-400">
+                            <div class="h-[85%] aspect-square border-[2px] border-black rounded-full flex items-center justify-center font-bold text-[9px] sm:text-[11px] text-gray-500">
                                 ${p}
                             </div>
                         </div>
@@ -337,7 +346,7 @@
                         Pastikan KOTAK HITAM di bawah masuk penuh dalam panduan kamera
                     </div>
                     
-                    <div class="w-full border-[2px] sm:border-[3px] border-black border-b-0 mx-auto" style="max-width: ${sets === 2 ? '85%' : '95%'};">
+                    <div class="w-full border-[2px] sm:border-[3px] border-black border-b-0 mx-auto" style="max-width: ${safeMaxWidth}px;">
                         ${soalanHtml}
                     </div>
 
@@ -356,7 +365,7 @@
             let boxW = cw * 0.85; 
             
             // Nisbah dinamik diselaraskan tepat dengan fungsi cetakan
-            let ratio = JUMLAH_SOALAN <= 15 ? 0.10 : (JUMLAH_SOALAN <= 30 ? 0.07 : 0.055);
+            let ratio = JUMLAH_SOALAN <= 15 ? 0.10 : (JUMLAH_SOALAN <= 30 ? 0.07 : 0.065);
             let rowHeight = boxW * ratio; 
             let boxH = rowHeight * JUMLAH_SOALAN;
 
@@ -466,8 +475,8 @@
             ctx.lineWidth = 4;
             ctx.strokeRect(geo.boxX, geo.boxY, geo.boxW, geo.boxH);
 
-            // Saiz bulatan ghost bergantung pada ketinggian baris, bukan lagi lebar kotak
-            const r = geo.rowHeight * 0.35; 
+            // Saiz bulatan ghost bergantung pada ketinggian baris diselaraskan (0.40 sepadan h-[85%])
+            const r = geo.rowHeight * 0.40; 
             
             for (let i = 0; i < JUMLAH_SOALAN; i++) {
                 let cy = geo.boxY + (i * geo.rowHeight) + (geo.rowHeight / 2);
@@ -530,7 +539,7 @@
 
             let markah = 0;
             let butiran = [];
-            const r = geo.rowHeight * 0.35; // Sampling bersandar pada tinggi
+            const r = geo.rowHeight * 0.40; // Sampling diselaraskan
 
             for (let i = 0; i < JUMLAH_SOALAN; i++) {
                 let cy = geo.boxY + (i * geo.rowHeight) + (geo.rowHeight / 2);
