@@ -136,11 +136,12 @@
             </div>
 
             <!-- TAB: IMBAS (KAMERA) -->
-            <div id="tab-imbas" class="tab-content hidden flex-col h-full">
+            <div id="tab-imbas" class="tab-content hidden flex-col">
                 <h2 class="text-lg font-bold mb-2">Imbas Jawapan Pelajar</h2>
                 <p class="text-sm text-gray-600 mb-4">Pastikan kotak hitam pada borang masuk <b>ngam-ngam</b> dalam petak merah di bawah. Kawasan mesti terang.</p>
                 
-                <div class="relative flex-1 bg-black rounded-lg overflow-hidden flex items-center justify-center">
+                <!-- Diperbaiki: Ditambah w-full, h-[60vh], dan min-h supaya sentiasa besar dan tak collapse -->
+                <div class="relative w-full h-[60vh] min-h-[350px] bg-black rounded-lg overflow-hidden flex items-center justify-center">
                     <video id="kamera" class="absolute inset-0 w-full h-full object-cover" autoplay playsinline></video>
                     
                     <!-- Petak Panduan (Alignment Guide) -->
@@ -252,7 +253,10 @@
 
             // Urus kamera - tutup kamera kalau bukan di tab imbas untuk jimat bateri
             if (idTab === 'imbas') {
-                mulakanKamera();
+                // Beri sedikit masa (delay) untuk kotak tu buka betul-betul sebelum on kamera
+                setTimeout(() => {
+                    mulakanKamera();
+                }, 100);
             } else {
                 hentikanKamera();
             }
@@ -326,7 +330,12 @@
         // ==========================================
         async function mulakanKamera() {
             const video = document.getElementById('kamera');
-            if (streamKamera) return; // Dah jalan
+            
+            // Jika stream dah jalan, kita pastikan dia 'play' saja
+            if (streamKamera) {
+                video.play().catch(e => console.log("Isu video play:", e));
+                return;
+            }
 
             try {
                 // Minta kamera belakang (environment)
@@ -334,6 +343,11 @@
                     video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } } 
                 });
                 video.srcObject = streamKamera;
+                
+                // DI PERBAIKI: Paksa browser play video stream tu. 
+                // Sangat penting untuk peranti mobile seperti iPhone.
+                await video.play();
+
             } catch (err) {
                 console.error("Ralat kamera:", err);
                 alert("Tak dapat buka kamera. Pastikan cikgu benarkan akses kamera untuk laman web ni.");
@@ -356,7 +370,7 @@
 
             const video = document.getElementById('kamera');
             if (!video.videoWidth) {
-                alert("Kamera belum bersedia.");
+                alert("Kamera belum bersedia. Sila tekan 'Buka Kamera' atau tunggu sebentar.");
                 return;
             }
 
