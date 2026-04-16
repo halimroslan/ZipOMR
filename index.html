@@ -85,7 +85,7 @@
                     <h2 class="text-lg font-bold">Cetak Borang OMR</h2>
                     <p class="text-sm text-gray-600 mb-4">
                         Format automatik <b id="label-orientasi">A4 Landscape</b>.<br>
-                        <span class="text-[10px] leading-tight block mt-1">(1-5: 6 Set | 6-15: 4 Set | 16-30: 3 Set | 31-40: 2 Set Portrait)</span>
+                        <span class="text-[10px] leading-tight block mt-1">(1-20: 6 Set | 21-30: 3 Set | 31-40: 2 Set Portrait)</span>
                     </p>
                     <button onclick="window.print()" class="w-full bg-blue-500 text-white font-bold py-3 rounded-lg shadow hover:bg-blue-600 transition mb-4">
                         🖨️ Tekan Untuk Cetak
@@ -248,8 +248,7 @@
             bekas.innerHTML = '';
             
             let sets = 3;
-            if (JUMLAH_SOALAN <= 5) sets = 6;
-            else if (JUMLAH_SOALAN <= 15) sets = 4;
+            if (JUMLAH_SOALAN <= 20) sets = 6;
             else if (JUMLAH_SOALAN <= 30) sets = 3;
             else sets = 2; // 31-40 soalan
             
@@ -266,12 +265,6 @@
                 bekas.className = "grid grid-cols-3 gap-4 print:gap-x-6 print:gap-y-6 w-full";
                 bekas.style.height = "18cm";
                 bekas.style.gridTemplateRows = "1fr 1fr";
-            } else if (sets === 4) {
-                styleTag.innerHTML = "@media print { @page { size: A4 landscape; margin: 10mm; } }";
-                labelOrientasi.innerText = "A4 Landscape";
-                bekas.className = "grid grid-cols-4 gap-4 print:gap-4 w-full";
-                bekas.style.height = "18cm";
-                bekas.style.gridTemplateRows = "1fr";
             } else if (sets === 3) {
                 styleTag.innerHTML = "@media print { @page { size: A4 landscape; margin: 10mm; } }";
                 labelOrientasi.innerText = "A4 Landscape";
@@ -286,9 +279,9 @@
                 bekas.style.gridTemplateRows = "1fr";
             }
 
-            let ratio = JUMLAH_SOALAN <= 15 ? 12 : (JUMLAH_SOALAN <= 30 ? 8.5 : 7.5);
+            let ratio = JUMLAH_SOALAN <= 20 ? 10 : (JUMLAH_SOALAN <= 30 ? 8.5 : 7.5);
             let availableHeight = 520; 
-            if (sets === 6) availableHeight = 280;
+            if (sets === 6) availableHeight = 250; 
             if (sets === 2) availableHeight = 780; 
 
             let actualRatio = ratio / 100;
@@ -355,7 +348,7 @@
         function dapatkanGeometriOMR(cw, ch) {
             let boxW = cw * 0.80; 
             
-            let ratio = JUMLAH_SOALAN <= 15 ? 0.12 : (JUMLAH_SOALAN <= 30 ? 0.085 : 0.075);
+            let ratio = JUMLAH_SOALAN <= 20 ? 0.10 : (JUMLAH_SOALAN <= 30 ? 0.085 : 0.075);
             let rowHeight = boxW * ratio; 
             let boxH = rowHeight * JUMLAH_SOALAN;
 
