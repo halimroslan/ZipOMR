@@ -11,10 +11,53 @@
             body {
                 background-color: white !important;
             }
-            /* Sembunyikan elemen yang tak perlu dicetak */
-            header, nav, .no-print, #tab-skema, #tab-imbas, #tab-keputusan {
+            
+            /* Sembunyikan header, nav & butang yang tidak patut di-print */
+            header, nav, .no-print {
                 display: none !important;
             }
+
+            /* --- TETAPAN DEFAULT: CETAK BORANG OMR --- */
+            body:not(.mode-cetak-skema) #tab-skema,
+            body:not(.mode-cetak-skema) #tab-imbas,
+            body:not(.mode-cetak-skema) #tab-keputusan {
+                display: none !important;
+            }
+            body:not(.mode-cetak-skema) #tab-cetak {
+                display: block !important;
+                visibility: visible !important;
+            }
+
+            /* --- TETAPAN BARU: CETAK SKEMA JAWAPAN --- */
+            body.mode-cetak-skema #tab-cetak,
+            body.mode-cetak-skema #tab-imbas,
+            body.mode-cetak-skema #tab-keputusan,
+            body.mode-cetak-skema button,
+            body.mode-cetak-skema .bg-blue-50 /* Sembunyi tetapan jumlah soalan */ {
+                display: none !important;
+            }
+            body.mode-cetak-skema #tab-skema {
+                display: block !important;
+            }
+            /* Jadikan skema dua lajur supaya jimat kertas dan nampak kemas */
+            body.mode-cetak-skema #borang-skema {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+                margin-top: 20px;
+            }
+            body.mode-cetak-skema h2 {
+                text-align: center;
+                font-size: 24px;
+                margin-bottom: 20px;
+                border-bottom: 2px solid black;
+                padding-bottom: 10px;
+            }
+            body.mode-cetak-skema .bg-white {
+                border: 1px solid #ccc !important;
+                break-inside: avoid;
+            }
+
             /* Reset layout supaya tidak kacau grid cetakan */
             .max-w-md, main, .min-h-screen {
                 max-width: 100% !important;
@@ -25,10 +68,7 @@
                 margin: 0 !important;
                 padding: 0 !important;
             }
-            #tab-cetak {
-                display: block !important;
-                visibility: visible !important;
-            }
+            
             /* Pastikan background bulat kelabu dan garisan hitam nampak */
             * {
                 -webkit-print-color-adjust: exact !important;
@@ -74,9 +114,16 @@
                 <div id="borang-skema" class="space-y-3">
                     <!-- Javascript akan jana borang ni -->
                 </div>
-                <button onclick="simpanSkema()" class="mt-6 w-full bg-green-500 text-white font-bold py-3 rounded-lg shadow hover:bg-green-600 active:bg-green-700 transition">
-                    Simpan Skema
-                </button>
+                
+                <div class="mt-6 flex flex-col gap-3">
+                    <button onclick="simpanSkema()" class="w-full bg-green-500 text-white font-bold py-3 rounded-lg shadow hover:bg-green-600 active:bg-green-700 transition">
+                        Simpan Skema
+                    </button>
+                    <!-- Butang Print Skema (Dihidden secara default) -->
+                    <button id="btn-print-skema" onclick="cetakSkema()" class="hidden w-full bg-gray-600 text-white font-bold py-3 rounded-lg shadow hover:bg-gray-700 transition flex items-center justify-center gap-2">
+                        🖨️ Print Skema Rujukan
+                    </button>
+                </div>
             </div>
 
             <!-- TAB: CETAK BORANG -->
@@ -88,7 +135,7 @@
                         <span class="text-[10px] leading-tight block mt-1">(1-5: 6 Set | 6-15: 4 Set | 16-30: 3 Set | 31-40: 2 Set Portrait)</span>
                     </p>
                     <button onclick="window.print()" class="w-full bg-blue-500 text-white font-bold py-3 rounded-lg shadow hover:bg-blue-600 transition mb-4">
-                        🖨️ Tekan Untuk Cetak
+                        🖨️ Tekan Untuk Cetak OMR
                     </button>
                 </div>
 
@@ -177,6 +224,10 @@
             }
             skemaJawapan = skemaBaru;
             
+            // Sembunyikan semula butang print skema bila soalan bertukar
+            let btnPrintSkema = document.getElementById('btn-print-skema');
+            if(btnPrintSkema) btnPrintSkema.classList.add('hidden');
+            
             janaBorangSkema();
             janaBorangCetak();
         }
@@ -237,6 +288,18 @@
                 return;
             }
             alert("Skema jawapan berjaya disimpan!");
+            // Tunjuk butang Print Skema
+            document.getElementById('btn-print-skema').classList.remove('hidden');
+        }
+
+        function cetakSkema() {
+            // Tambah class khas ke body supaya CSS print bertindak balas
+            document.body.classList.add('mode-cetak-skema');
+            window.print();
+            // Lepas selesai buka prompt print, buang balik class tersebut
+            setTimeout(() => {
+                document.body.classList.remove('mode-cetak-skema');
+            }, 500);
         }
 
         // ==========================================
