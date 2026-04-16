@@ -240,7 +240,18 @@
         }
 
         // ==========================================
-        // FUNGSI CETAK BORANG (GRID A4 DINAMIK + TITIK PENJAJARAN)
+        // MATEMATIK ASAS NISBAH (DIKONGSI BERSAMA CETAK & KAMERA)
+        // ==========================================
+        function dapatkanFaktorTinggi() {
+            // Berapa peratus ketinggian satu baris berbanding lebar kotak.
+            let factor = 0.09;
+            if (JUMLAH_SOALAN > 15) factor = 0.075;
+            if (JUMLAH_SOALAN > 30) factor = 0.06;
+            return factor;
+        }
+
+        // ==========================================
+        // FUNGSI CETAK BORANG (KINI STRICT PIXEL DIMENSIONS)
         // ==========================================
         function janaBorangCetak() {
             const bekas = document.getElementById('cetakan-kertas-container');
@@ -286,16 +297,20 @@
                 bekas.style.gridTemplateRows = "1fr";
             }
 
-            let ratio = JUMLAH_SOALAN <= 15 ? 10 : (JUMLAH_SOALAN <= 30 ? 7 : 6.5);
+            // MENGUNCI NISBAH SECARA MATEMATIK TEGAS
+            let factor = dapatkanFaktorTinggi();
+            let totalHeightRatio = JUMLAH_SOALAN * factor;
+
             let availableHeight = 520; 
             if (sets === 6) availableHeight = 280;
             if (sets === 2) availableHeight = 780; 
 
-            let actualRatio = ratio / 100;
-            let safeMaxWidth = Math.floor(availableHeight / (JUMLAH_SOALAN * actualRatio));
-            
+            let safeMaxWidth = Math.floor(availableHeight / totalHeightRatio);
             if (sets === 2) safeMaxWidth = Math.min(320, safeMaxWidth);
             else safeMaxWidth = Math.min(280, safeMaxWidth);
+
+            // Kotak OMR akan ditetapkan pada ketinggian dan kelebaran PIKSEL ini secara spesifik.
+            let safeMaxHeight = safeMaxWidth * totalHeightRatio;
 
             for (let s = 0; s < sets; s++) {
                 let divSet = document.createElement('div');
@@ -305,25 +320,23 @@
                 for (let i = 0; i < JUMLAH_SOALAN; i++) {
                     let htmlBulatan = PILIHAN.map(p => `
                         <div class="flex-1 h-full flex items-center justify-center">
-                            <div class="h-[85%] aspect-square border-[2px] border-black rounded-full flex items-center justify-center font-bold text-[9px] sm:text-[11px] text-gray-500">
+                            <div class="h-[75%] aspect-square border-[2px] border-black rounded-full flex items-center justify-center font-bold text-[9px] sm:text-[11px] text-gray-500">
                                 ${p}
                             </div>
                         </div>
                     `).join('');
 
+                    // Kita guna flex-1 supaya setiap baris ambil ketinggian saksama secara automatik
                     soalanHtml += `
-                        <div class="w-full relative border-b-[2px] border-black box-border bg-white" style="padding-top: ${ratio}%;">
-                            <div class="absolute inset-0 flex w-full h-full">
-                                <div class="w-[20%] h-full flex items-center justify-end pr-2 font-bold border-r-[2px] border-black text-xs sm:text-sm">${i + 1}.</div>
-                                <div class="w-[80%] flex">
-                                    ${htmlBulatan}
-                                </div>
+                        <div class="w-full flex-1 border-b-[2px] border-black box-border flex items-center bg-white relative">
+                            <div class="w-[20%] h-full flex items-center justify-end pr-2 font-bold border-r-[2px] border-black text-xs sm:text-sm">${i + 1}.</div>
+                            <div class="w-[80%] flex h-full items-center">
+                                ${htmlBulatan}
                             </div>
                         </div>
                     `;
                 }
 
-                // Disini kita tambah 4 titik hitam penjajaran pada penjuru kotak (macam ZipGrade)
                 divSet.innerHTML = `
                     <div class="text-center pb-2 mb-2 border-b-2 border-black shrink-0">
                         <h2 class="text-sm sm:text-base font-bold uppercase tracking-wider">Kertas Jawapan OMR</h2>
@@ -337,7 +350,9 @@
                         Pastikan 4 KOTAK HITAM di bawah selari dengan panduan kamera
                     </div>
                     
-                    <div class="w-full relative border-[2px] sm:border-[3px] border-black border-b-0 mx-auto" style="max-width: ${safeMaxWidth}px;">
+                    <!-- KOTAK TERKUNCI SAIZ: Mengelakkan herotan pelayar pencetak -->
+                    <div class="w-full flex flex-col relative border-[2px] sm:border-[3px] border-black border-b-0 mx-auto" 
+                         style="width: ${safeMaxWidth}px; height: ${safeMaxHeight}px;">
                         
                         <!-- 4 Titik Hitam Auto-Snap -->
                         <div class="marker-corner absolute top-0 left-0 w-4 h-4 sm:w-5 sm:h-5 bg-black z-10" style="transform: translate(-50%, -50%);"></div>
@@ -357,24 +372,35 @@
         }
 
         // ==========================================
-        // MATEMATIK GEOMETRI OMR
+        // MATEMATIK GEOMETRI KAMERA (DIKUNCI KE NISBAH CETAKAN)
         // ==========================================
         function dapatkanGeometriOMR(cw, ch) {
-            let boxW = cw * 0.80; 
-            
-            let ratio = JUMLAH_SOALAN <= 15 ? 0.10 : (JUMLAH_SOALAN <= 30 ? 0.07 : 0.065);
-            let rowHeight = boxW * ratio; 
-            let boxH = rowHeight * JUMLAH_SOALAN;
+            let factor = dapatkanFaktorTinggi();
+            let totalHeightRatio = JUMLAH_SOALAN * factor;
+            let aspectRatio = 1 / totalHeightRatio;
 
-            if (boxH > ch * 0.80) {
-                boxH = ch * 0.80;
-                rowHeight = boxH / JUMLAH_SOALAN;
-                boxW = rowHeight / ratio;
+            // Kamera akan setkan kotak 80% dari paparan
+            let maxBoxW = cw * 0.80; 
+            let maxBoxH = ch * 0.80;
+
+            let boxW, boxH;
+
+            // Kunci ketat mengikut Aspect Ratio Cetakan
+            if (maxBoxW * totalHeightRatio <= maxBoxH) {
+                // Skrin terhad dari segi kelebaran (Width bound)
+                boxW = maxBoxW;
+                boxH = boxW * totalHeightRatio;
+            } else {
+                // Skrin terhad dari segi ketinggian (Height bound)
+                boxH = maxBoxH;
+                boxW = boxH * aspectRatio;
             }
 
             const boxX = (cw - boxW) / 2;
             const boxY = (ch - boxH) / 2;
+            const rowHeight = boxH / JUMLAH_SOALAN;
 
+            // X offsets tepat di tengah slot 20% bagi setiap pilihan [A, B, C, D]
             const posXPilihan = [
                 boxX + boxW * 0.30, // A 
                 boxX + boxW * 0.50, // B
@@ -455,7 +481,6 @@
                 lukisPanduan(ctxO, cw, ch, geo);
 
                 // --- LOGIK AUTO-SNAP ---
-                // Kita periksa setiap 10-15 frame supaya fon tak lag
                 autoSnapCounter++;
                 if (autoSnapCounter > 12) {
                     autoSnapCounter = 0;
@@ -501,13 +526,10 @@
             ctx.strokeStyle = '#22c55e'; // Hijau
             ctx.lineWidth = 4;
             
-            // TL
+            // Petak hijau betul-betul di tengah-tengah bucu geometri
             ctx.strokeRect(geo.boxX - ms/2, geo.boxY - ms/2, ms, ms);
-            // TR
             ctx.strokeRect(geo.boxX + geo.boxW - ms/2, geo.boxY - ms/2, ms, ms);
-            // BL
             ctx.strokeRect(geo.boxX - ms/2, geo.boxY + geo.boxH - ms/2, ms, ms);
-            // BR
             ctx.strokeRect(geo.boxX + geo.boxW - ms/2, geo.boxY + geo.boxH - ms/2, ms, ms);
 
             const r = geo.rowHeight * 0.40; 
@@ -525,23 +547,22 @@
 
         // Memeriksa jika 4 titik penjuru adalah GELAP (Marker dikesan)
         function semakAutoSnap(ctx, geo) {
-            let size = Math.max(8, geo.boxW * 0.02);
+            let size = Math.max(10, geo.boxW * 0.03); // Saiz kotak titik auto-snap
             let half = size / 2;
             
-            // Koordinat 4 bucu berdasarkan geometri kotak
+            // Koordinat 4 titik tepat pada bucu
             let titikUjian = [
-                {x: geo.boxX - half, y: geo.boxY - half}, // Top Left
-                {x: geo.boxX + geo.boxW - half, y: geo.boxY - half}, // Top Right
-                {x: geo.boxX - half, y: geo.boxY + geo.boxH - half}, // Bottom Left
-                {x: geo.boxX + geo.boxW - half, y: geo.boxY + geo.boxH - half} // Bottom Right
+                {x: geo.boxX, y: geo.boxY}, // Top Left
+                {x: geo.boxX + geo.boxW, y: geo.boxY}, // Top Right
+                {x: geo.boxX, y: geo.boxY + geo.boxH}, // Bottom Left
+                {x: geo.boxX + geo.boxW, y: geo.boxY + geo.boxH} // Bottom Right
             ];
 
             let jumlahGelap = 0;
             
             for (let pt of titikUjian) {
-                // Pastikan tak terkeluar canvas
-                let sx = Math.max(0, Math.min(ctx.canvas.width - size, pt.x));
-                let sy = Math.max(0, Math.min(ctx.canvas.height - size, pt.y));
+                let sx = Math.max(0, Math.min(ctx.canvas.width - size, pt.x - half));
+                let sy = Math.max(0, Math.min(ctx.canvas.height - size, pt.y - half));
                 
                 let imgData = ctx.getImageData(sx, sy, size, size);
                 let pixels = imgData.data;
@@ -552,7 +573,6 @@
                 }
                 let avg = sum / (pixels.length / 4);
                 
-                // Jika purata < 90, ia dikira warna hitam/gelap
                 if (avg < 90) jumlahGelap++; 
             }
 
@@ -569,7 +589,6 @@
             }
             let cAvg = cSum / (cData.data.length / 4);
 
-            // AUTO SNAP: Jika 4 bucu gelap DAN tengah tu cerah
             return (jumlahGelap === 4 && cAvg > 130);
         }
 
@@ -610,7 +629,7 @@
 
             let markah = 0;
             let butiran = [];
-            const r = geo.rowHeight * 0.40;
+            const r = geo.rowHeight * 0.35; // Sampling bersandar pada tinggi baris
 
             for (let i = 0; i < JUMLAH_SOALAN; i++) {
                 let cy = geo.boxY + (i * geo.rowHeight) + (geo.rowHeight / 2);
