@@ -108,6 +108,7 @@
             * {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
+                font-family: 'Inter', sans-serif !important;
             }
             .marker-corner {
                 background-color: black !important;
@@ -308,6 +309,22 @@
         let isScanning = false;
         let autoSnapCounter = 0;
 
+        // Snippet untuk logo dalam borang cetakan
+        const LOGO_PRINT_HTML = `
+            <div class="flex items-center justify-center gap-2 mb-1" style="font-family: 'Inter', sans-serif;">
+                <svg class="w-6 h-6 text-black" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="6.5" y="5.5" width="11" height="13" rx="3.5" fill="currentColor" fill-opacity="0.2" />
+                    <path d="M8 4H6.5C5.11929 4 4 5.11929 4 6.5V8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M16 4H17.5C18.8807 4 20 5.11929 20 6.5V8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M8 20H6.5C5.11929 20 4 18.8807 4 17.5V16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M16 20H17.5C18.8807 20 20 18.8807 20 17.5V16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M2 12H22" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+                <span class="text-xl font-bold tracking-tight text-black">CikguScan</span>
+                <span class="text-[8px] font-medium bg-black text-white px-2 py-0.5 rounded-full">By Sir Halim</span>
+            </div>
+        `;
+
         function kemaskiniJumlahSoalan() {
             let inputEl = document.getElementById('input-jumlah-soalan');
             let nilai = parseInt(inputEl.value);
@@ -454,6 +471,7 @@
 
             let divSet = document.createElement('div');
             divSet.className = "bg-white flex flex-col justify-start print:p-0 overflow-hidden mx-auto break-inside-avoid print:break-inside-avoid";
+            divSet.style.fontFamily = "'Inter', sans-serif";
             
             let soalanHtml = '';
             for (let i = 0; i < JUMLAH_SOALAN; i++) {
@@ -466,14 +484,14 @@
                     <div class="flex-1 h-full flex items-center justify-center">
                         <svg viewBox="0 0 100 100" style="height: 90%; aspect-ratio: 1/1;">
                             <circle cx="50" cy="50" r="46" stroke="black" stroke-width="4" fill="${fillCircle}" />
-                            <text x="50" y="50" dy=".35em" text-anchor="middle" font-size="52" font-family="sans-serif" font-weight="bold" fill="${fillText}">${p}</text>
+                            <text x="50" y="50" dy=".35em" text-anchor="middle" font-size="52" font-family="'Inter', sans-serif" font-weight="bold" fill="${fillText}">${p}</text>
                         </svg>
                     </div>
                 `}).join('');
 
                 soalanHtml += `
                     <div class="w-full flex box-border bg-white" style="aspect-ratio: 100 / ${ratio};">
-                        <div class="w-[20%] h-full flex items-center justify-end pr-2 sm:pr-3 font-bold border-r-[2px] border-black text-xs sm:text-base">
+                        <div class="w-[20%] h-full flex items-center justify-end pr-2 sm:pr-3 font-bold border-r-[2px] border-black text-xs sm:text-base" style="font-family: 'Inter', sans-serif;">
                             ${i + 1}.
                         </div>
                         <div class="w-[80%] h-full flex items-center">
@@ -485,9 +503,10 @@
 
             divSet.innerHTML = `
                 <div class="text-center pb-2 mb-2 shrink-0">
-                    <h2 class="text-lg sm:text-xl font-bold uppercase tracking-wider border-b-2 border-black inline-block pb-1">SKEMA JAWAPAN OMR</h2>
-                    <div class="flex justify-center mt-2 text-xs sm:text-sm font-bold px-1 text-gray-700">
-                        *Sila imbas/scan menggunakan kamera untuk memastikan kesahan skema/ penskoran.*
+                    ${LOGO_PRINT_HTML}
+                    <div class="text-[10px] font-bold uppercase tracking-widest border-b border-black inline-block pb-1">SKEMA JAWAPAN</div>
+                    <div class="flex justify-center mt-2 text-[8px] font-bold px-1 text-gray-700">
+                        *Sila imbas menggunakan kamera untuk penskoran automatik.*
                     </div>
                 </div>
                 
@@ -563,6 +582,7 @@
             for (let s = 0; s < sets; s++) {
                 let divSet = document.createElement('div');
                 divSet.className = "bg-white flex flex-col justify-start border border-gray-300 print:border-none p-2 print:p-0 overflow-hidden break-inside-avoid print:break-inside-avoid";
+                divSet.style.fontFamily = "'Inter', sans-serif";
                 
                 let soalanHtml = '';
                 for (let i = 0; i < JUMLAH_SOALAN; i++) {
@@ -570,14 +590,14 @@
                         <div class="flex-1 h-full flex items-center justify-center">
                             <svg viewBox="0 0 100 100" style="height: 90%; aspect-ratio: 1/1;">
                                 <circle cx="50" cy="50" r="46" stroke="black" stroke-width="4" fill="white" />
-                                <text x="50" y="50" dy=".35em" text-anchor="middle" font-size="52" font-family="sans-serif" font-weight="bold" fill="#4B5563">${p}</text>
+                                <text x="50" y="50" dy=".35em" text-anchor="middle" font-size="52" font-family="'Inter', sans-serif" font-weight="bold" fill="#4B5563">${p}</text>
                             </svg>
                         </div>
                     `).join('');
 
                     soalanHtml += `
                         <div class="w-full flex box-border bg-white" style="aspect-ratio: 100 / ${ratio};">
-                            <div class="w-[20%] h-full flex items-center justify-end pr-2 sm:pr-3 font-bold border-r-[2px] border-black text-xs sm:text-base">
+                            <div class="w-[20%] h-full flex items-center justify-end pr-2 sm:pr-3 font-bold border-r-[2px] border-black text-xs sm:text-base" style="font-family: 'Inter', sans-serif;">
                                 ${i + 1}.
                             </div>
                             <div class="w-[80%] h-full flex items-center">
@@ -588,11 +608,11 @@
                 }
 
                 divSet.innerHTML = `
-                    <div class="text-center pb-2 mb-2 shrink-0">
-                        <h2 class="text-sm sm:text-base font-bold uppercase tracking-wider">CikguScan OMR</h2>
-                        <div class="flex justify-between mt-2 text-left text-[10px] sm:text-xs font-bold px-1">
-                            <div>Nama: _________________</div>
-                            <div>Kelas: ______</div>
+                    <div class="text-center pb-1 mb-1 shrink-0">
+                        ${LOGO_PRINT_HTML}
+                        <div class="flex justify-between mt-2 text-left text-[8px] font-bold px-1" style="font-family: 'Inter', sans-serif;">
+                            <div>NAMA: ____________________</div>
+                            <div>KELAS: ______</div>
                         </div>
                     </div>
                     
