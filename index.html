@@ -251,7 +251,7 @@
         }
 
         // ==========================================
-        // FUNGSI CETAK BORANG (KINI STRICT PIXEL DIMENSIONS)
+        // FUNGSI CETAK BORANG (TEKNIK PIXEL TEPAT & MARKER DINAMIK)
         // ==========================================
         function janaBorangCetak() {
             const bekas = document.getElementById('cetakan-kertas-container');
@@ -271,6 +271,7 @@
                 document.head.appendChild(styleTag);
             }
 
+            // Tetapan Layout Grid
             if (sets === 6) {
                 styleTag.innerHTML = "@media print { @page { size: A4 landscape; margin: 10mm; } }";
                 labelOrientasi.innerText = "A4 Landscape";
@@ -297,10 +298,10 @@
                 bekas.style.gridTemplateRows = "1fr";
             }
 
-            // MENGUNCI NISBAH SECARA MATEMATIK TEGAS
+            // Pengiraan Nisbah Kotak Secara Fleksibel
             let factor = dapatkanFaktorTinggi();
             let totalHeightRatio = JUMLAH_SOALAN * factor;
-
+            
             let availableHeight = 520; 
             if (sets === 6) availableHeight = 280;
             if (sets === 2) availableHeight = 780; 
@@ -309,27 +310,32 @@
             if (sets === 2) safeMaxWidth = Math.min(320, safeMaxWidth);
             else safeMaxWidth = Math.min(280, safeMaxWidth);
 
-            // Kotak OMR akan ditetapkan pada ketinggian dan kelebaran PIKSEL ini secara spesifik.
-            let safeMaxHeight = safeMaxWidth * totalHeightRatio;
+            // DIBAIKI 1: Kunci ketinggian keseluruhan secara piksel untuk elak melimpah (overflow)
+            let computedHeight = Math.floor(safeMaxWidth * totalHeightRatio);
+            
+            // DIBAIKI 2: Saiz 4 Titik Hitam dikira dinamik (7% dari lebar kotak). Ia akan jadi kecil & kemas.
+            let markerSize = Math.max(12, Math.floor(safeMaxWidth * 0.07)); 
+            
+            // DIBAIKI 3: Ketinggian setiap baris dipaksa tepat-tepat sama rata (cth: 5% untuk 20 soalan)
+            let rowPercent = (100 / JUMLAH_SOALAN).toFixed(4);
 
             for (let s = 0; s < sets; s++) {
                 let divSet = document.createElement('div');
-                divSet.className = "bg-white flex flex-col justify-start border border-gray-300 print:border-none p-2 print:p-0 overflow-hidden break-inside-avoid print:break-inside-avoid";
+                divSet.className = "bg-white flex flex-col justify-start border border-gray-300 print:border-none p-2 print:p-0 break-inside-avoid print:break-inside-avoid relative";
                 
                 let soalanHtml = '';
                 for (let i = 0; i < JUMLAH_SOALAN; i++) {
                     let htmlBulatan = PILIHAN.map(p => `
-                        <div class="flex-1 h-full flex items-center justify-center">
-                            <div class="h-[75%] aspect-square border-[2px] border-black rounded-full flex items-center justify-center font-bold text-[9px] sm:text-[11px] text-gray-500">
+                        <div class="flex-1 h-full flex items-center justify-center py-[5%]">
+                            <div class="h-full aspect-square border-[2px] border-black rounded-full flex items-center justify-center font-bold text-[9px] sm:text-[11px] text-gray-500">
                                 ${p}
                             </div>
                         </div>
                     `).join('');
 
-                    // Kita guna flex-1 supaya setiap baris ambil ketinggian saksama secara automatik
                     soalanHtml += `
-                        <div class="w-full flex-1 border-b-[2px] border-black box-border flex items-center bg-white relative">
-                            <div class="w-[20%] h-full flex items-center justify-end pr-2 font-bold border-r-[2px] border-black text-xs sm:text-sm">${i + 1}.</div>
+                        <div class="w-full border-b-[2px] border-black box-border flex items-center bg-white" style="height: ${rowPercent}%;">
+                            <div class="w-[20%] h-full flex items-center justify-center font-bold border-r-[2px] border-black text-[10px] sm:text-xs">${i + 1}.</div>
                             <div class="w-[80%] flex h-full items-center">
                                 ${htmlBulatan}
                             </div>
@@ -338,32 +344,35 @@
                 }
 
                 divSet.innerHTML = `
-                    <div class="text-center pb-2 mb-2 border-b-2 border-black shrink-0">
-                        <h2 class="text-sm sm:text-base font-bold uppercase tracking-wider">Kertas Jawapan OMR</h2>
-                        <div class="flex justify-between mt-2 text-left text-[10px] sm:text-xs font-bold px-1">
+                    <div class="text-center pb-1 mb-1 border-b-2 border-black shrink-0">
+                        <h2 class="text-xs sm:text-sm font-bold uppercase tracking-wider">Kertas Jawapan OMR</h2>
+                        <div class="flex justify-between mt-1 text-[9px] sm:text-[10px] font-bold px-1">
                             <div>Nama: _________________</div>
                             <div>Kelas: ______</div>
                         </div>
                     </div>
 
-                    <div class="text-center font-bold text-[8px] sm:text-[10px] mb-2 text-gray-700 uppercase shrink-0">
+                    <div class="text-center font-bold text-[7px] sm:text-[8px] mb-2 text-gray-700 uppercase shrink-0">
                         Pastikan 4 KOTAK HITAM di bawah selari dengan panduan kamera
                     </div>
                     
-                    <!-- KOTAK TERKUNCI SAIZ: Mengelakkan herotan pelayar pencetak -->
-                    <div class="w-full flex flex-col relative border-[2px] sm:border-[3px] border-black border-b-0 mx-auto" 
-                         style="width: ${safeMaxWidth}px; height: ${safeMaxHeight}px;">
+                    <div class="w-full mx-auto relative px-4 py-4" style="max-width: ${safeMaxWidth + 30}px;">
                         
-                        <!-- 4 Titik Hitam Auto-Snap -->
-                        <div class="marker-corner absolute top-0 left-0 w-4 h-4 sm:w-5 sm:h-5 bg-black z-10" style="transform: translate(-50%, -50%);"></div>
-                        <div class="marker-corner absolute top-0 right-0 w-4 h-4 sm:w-5 sm:h-5 bg-black z-10" style="transform: translate(50%, -50%);"></div>
-                        <div class="marker-corner absolute bottom-0 left-0 w-4 h-4 sm:w-5 sm:h-5 bg-black z-10" style="transform: translate(-50%, 50%);"></div>
-                        <div class="marker-corner absolute bottom-0 right-0 w-4 h-4 sm:w-5 sm:h-5 bg-black z-10" style="transform: translate(50%, 50%);"></div>
+                        <!-- DIBAIKI: Lebar dan Tinggi dikunci ketat menggunakan Pixel yang telah dihitung -->
+                        <div class="w-full relative mx-auto border-[2px] sm:border-[3px] border-black border-b-0 bg-white" 
+                             style="width: ${safeMaxWidth}px; height: ${computedHeight}px;">
+                            
+                            <!-- 4 Titik Hitam Auto-Snap dengan saiz dinamik (markerSize) -->
+                            <div class="absolute bg-black z-10" style="width: ${markerSize}px; height: ${markerSize}px; top: 0; left: 0; transform: translate(-50%, -50%);"></div>
+                            <div class="absolute bg-black z-10" style="width: ${markerSize}px; height: ${markerSize}px; top: 0; right: 0; transform: translate(50%, -50%);"></div>
+                            <div class="absolute bg-black z-10" style="width: ${markerSize}px; height: ${markerSize}px; bottom: 0; left: 0; transform: translate(-50%, 50%);"></div>
+                            <div class="absolute bg-black z-10" style="width: ${markerSize}px; height: ${markerSize}px; bottom: 0; right: 0; transform: translate(50%, 50%);"></div>
 
-                        ${soalanHtml}
+                            ${soalanHtml}
+                        </div>
                     </div>
 
-                    <div class="mt-4 text-center text-[8px] sm:text-[10px] font-bold text-gray-700 shrink-0">
+                    <div class="mt-2 text-center text-[7px] sm:text-[8px] font-bold text-gray-700 shrink-0">
                         * Hitamkan bulatan gelap-gelap. Jangan tanda rupa X atau tick (✓).
                     </div>
                 `;
