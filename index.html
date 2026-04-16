@@ -305,20 +305,20 @@
                 for (let i = 0; i < JUMLAH_SOALAN; i++) {
                     let htmlBulatan = PILIHAN.map(p => `
                         <div class="flex-1 h-full flex items-center justify-center">
-                            <svg viewBox="0 0 100 100" class="h-[80%] aspect-square" style="max-height: 100%; max-width: 100%;">
-                                <circle cx="50" cy="50" r="44" stroke="black" stroke-width="6" fill="white" />
-                                <text x="50" y="50" dy=".35em" text-anchor="middle" font-size="46" font-family="sans-serif" font-weight="bold" fill="#4B5563">${p}</text>
+                            <svg viewBox="0 0 100 100" style="height: 90%; aspect-ratio: 1/1;">
+                                <circle cx="50" cy="50" r="46" stroke="black" stroke-width="4" fill="white" />
+                                <text x="50" y="50" dy=".35em" text-anchor="middle" font-size="52" font-family="sans-serif" font-weight="bold" fill="#4B5563">${p}</text>
                             </svg>
                         </div>
                     `).join('');
 
                     soalanHtml += `
-                        <div class="w-full relative box-border bg-white" style="padding-top: ${ratio}%;">
-                            <div class="absolute inset-0 flex w-full h-full py-[3%]">
-                                <div class="w-[20%] h-full flex items-center justify-end pr-1 sm:pr-2 font-bold border-r-[2px] border-black text-[9px] sm:text-[11px] leading-none">${i + 1}.</div>
-                                <div class="w-[80%] flex h-full">
-                                    ${htmlBulatan}
-                                </div>
+                        <div class="w-full flex box-border bg-white" style="aspect-ratio: 100 / ${ratio};">
+                            <div class="w-[20%] h-full flex items-center justify-end pr-2 sm:pr-3 font-bold border-r-[2px] border-black text-xs sm:text-base">
+                                ${i + 1}.
+                            </div>
+                            <div class="w-[80%] h-full flex items-center">
+                                ${htmlBulatan}
                             </div>
                         </div>
                     `;
