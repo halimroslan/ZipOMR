@@ -28,34 +28,23 @@
                 visibility: visible !important;
             }
 
-            /* --- TETAPAN BARU: CETAK SKEMA JAWAPAN --- */
+            /* --- TETAPAN BARU: CETAK SKEMA JAWAPAN OMR --- */
             body.mode-cetak-skema #tab-cetak,
             body.mode-cetak-skema #tab-imbas,
             body.mode-cetak-skema #tab-keputusan,
             body.mode-cetak-skema button,
-            body.mode-cetak-skema .bg-blue-50 /* Sembunyi tetapan jumlah soalan */ {
+            body.mode-cetak-skema .bg-blue-50,
+            body.mode-cetak-skema h2.tajuk-skema,
+            body.mode-cetak-skema #borang-skema {
                 display: none !important;
             }
             body.mode-cetak-skema #tab-skema {
                 display: block !important;
             }
-            /* Jadikan skema dua lajur supaya jimat kertas dan nampak kemas */
-            body.mode-cetak-skema #borang-skema {
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
-                gap: 12px;
-                margin-top: 20px;
-            }
-            body.mode-cetak-skema h2 {
-                text-align: center;
-                font-size: 24px;
-                margin-bottom: 20px;
-                border-bottom: 2px solid black;
-                padding-bottom: 10px;
-            }
-            body.mode-cetak-skema .bg-white {
-                border: 1px solid #ccc !important;
-                break-inside: avoid;
+            
+            body.mode-cetak-skema #cetakan-skema-omr-container {
+                display: block !important;
+                visibility: visible !important;
             }
 
             /* Reset layout supaya tidak kacau grid cetakan */
@@ -110,7 +99,7 @@
                     <p class="text-xs text-gray-500 mt-2">*Tukar jumlah di sini, skema & borang akan automatik dikemaskini.</p>
                 </div>
 
-                <h2 class="text-lg font-bold mb-4">Tetapkan Skema Jawapan</h2>
+                <h2 class="text-lg font-bold mb-4 tajuk-skema">Tetapkan Skema Jawapan</h2>
                 <div id="borang-skema" class="space-y-3">
                     <!-- Javascript akan jana borang ni -->
                 </div>
@@ -120,9 +109,14 @@
                         Simpan Skema
                     </button>
                     <!-- Butang Print Skema (Dihidden secara default) -->
-                    <button id="btn-print-skema" onclick="cetakSkema()" class="hidden w-full bg-gray-600 text-white font-bold py-3 rounded-lg shadow hover:bg-gray-700 transition flex items-center justify-center gap-2">
-                        🖨️ Print Skema Rujukan
+                    <button id="btn-print-skema" onclick="cetakSkema()" class="hidden w-full bg-gray-800 text-white font-bold py-3 rounded-lg shadow hover:bg-black transition flex items-center justify-center gap-2">
+                        🖨️ Print Skema (Boleh Diimbas)
                     </button>
+                </div>
+
+                <!-- KAWASAN CETAKAN SKEMA OMR -->
+                <div id="cetakan-skema-omr-container" class="hidden w-full mx-auto mt-4">
+                    <!-- Grid Cetakan Skema Akan Dijana Oleh JS -->
                 </div>
             </div>
 
@@ -293,6 +287,9 @@
         }
 
         function cetakSkema() {
+            // Jana layout skema berformat OMR terlebih dahulu
+            janaBorangSkemaOMR();
+            
             // Tambah class khas ke body supaya CSS print bertindak balas
             document.body.classList.add('mode-cetak-skema');
             window.print();
@@ -303,7 +300,85 @@
         }
 
         // ==========================================
-        // FUNGSI CETAK BORANG (GRID A4 DINAMIK + TITIK PENJAJARAN)
+        // FUNGSI CETAK SKEMA OMR (Boleh Diimbas Kamera)
+        // ==========================================
+        function janaBorangSkemaOMR() {
+            const bekas = document.getElementById('cetakan-skema-omr-container');
+            if(!bekas) return;
+            bekas.innerHTML = '';
+
+            let styleTag = document.getElementById('dynamic-print-style-skema');
+            if (!styleTag) {
+                styleTag = document.createElement('style');
+                styleTag.id = 'dynamic-print-style-skema';
+                document.head.appendChild(styleTag);
+            }
+            
+            // Format sentiasa A4 Portrait untuk cetakan skema 
+            styleTag.innerHTML = "@media print { @page { size: A4 portrait; margin: 10mm; } }";
+            
+            let ratio = JUMLAH_SOALAN <= 15 ? 12 : (JUMLAH_SOALAN <= 30 ? 8.5 : 7.5);
+            let availableHeight = 800; // Tinggi anggaran A4 Portrait
+            let actualRatio = ratio / 100;
+            let safeMaxWidth = Math.floor(availableHeight / (JUMLAH_SOALAN * actualRatio));
+            safeMaxWidth = Math.min(450, safeMaxWidth); // Jangan melampau besar
+
+            let divSet = document.createElement('div');
+            divSet.className = "bg-white flex flex-col justify-start print:p-0 overflow-hidden mx-auto break-inside-avoid print:break-inside-avoid";
+            
+            let soalanHtml = '';
+            for (let i = 0; i < JUMLAH_SOALAN; i++) {
+                let htmlBulatan = PILIHAN.map(p => {
+                    let isJawapan = (skemaJawapan[i] === p);
+                    // Hitamkan bulatan jika ia adalah skema jawapan
+                    let fillCircle = isJawapan ? "black" : "white";
+                    let fillText = isJawapan ? "white" : "#4B5563";
+                    
+                    return `
+                    <div class="flex-1 h-full flex items-center justify-center">
+                        <svg viewBox="0 0 100 100" style="height: 90%; aspect-ratio: 1/1;">
+                            <circle cx="50" cy="50" r="46" stroke="black" stroke-width="4" fill="${fillCircle}" />
+                            <text x="50" y="50" dy=".35em" text-anchor="middle" font-size="52" font-family="sans-serif" font-weight="bold" fill="${fillText}">${p}</text>
+                        </svg>
+                    </div>
+                `}).join('');
+
+                soalanHtml += `
+                    <div class="w-full flex box-border bg-white" style="aspect-ratio: 100 / ${ratio};">
+                        <div class="w-[20%] h-full flex items-center justify-end pr-2 sm:pr-3 font-bold border-r-[2px] border-black text-xs sm:text-base">
+                            ${i + 1}.
+                        </div>
+                        <div class="w-[80%] h-full flex items-center">
+                            ${htmlBulatan}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Memasukkan 4 titik hitam auto-snap
+            divSet.innerHTML = `
+                <div class="text-center pb-2 mb-2 shrink-0">
+                    <h2 class="text-lg sm:text-xl font-bold uppercase tracking-wider border-b-2 border-black inline-block pb-1">SKEMA JAWAPAN OMR</h2>
+                    <div class="flex justify-center mt-2 text-xs sm:text-sm font-bold px-1 text-gray-700">
+                        *Borang ini serasi dan boleh diimbas dengan sistem kamera*
+                    </div>
+                </div>
+                
+                <div class="w-full relative border-[2px] sm:border-[3px] border-black mx-auto mt-4" style="max-width: ${safeMaxWidth}px;">
+                    <!-- 4 Titik Hitam Auto-Snap (Penting untuk kamera kenal) -->
+                    <div class="marker-corner absolute top-0 left-0 w-4 h-4 sm:w-5 sm:h-5 bg-black z-10" style="transform: translate(-50%, -50%);"></div>
+                    <div class="marker-corner absolute top-0 right-0 w-4 h-4 sm:w-5 sm:h-5 bg-black z-10" style="transform: translate(50%, -50%);"></div>
+                    <div class="marker-corner absolute bottom-0 left-0 w-4 h-4 sm:w-5 sm:h-5 bg-black z-10" style="transform: translate(-50%, 50%);"></div>
+                    <div class="marker-corner absolute bottom-0 right-0 w-4 h-4 sm:w-5 sm:h-5 bg-black z-10" style="transform: translate(50%, 50%);"></div>
+
+                    ${soalanHtml}
+                </div>
+            `;
+            bekas.appendChild(divSet);
+        }
+
+        // ==========================================
+        // FUNGSI CETAK BORANG KOSONG (PELAJAR)
         // ==========================================
         function janaBorangCetak() {
             const bekas = document.getElementById('cetakan-kertas-container');
@@ -387,7 +462,6 @@
                     `;
                 }
 
-                // Disini kita tambah 4 titik hitam penjajaran pada penjuru kotak (macam ZipGrade)
                 divSet.innerHTML = `
                     <div class="text-center pb-2 mb-2 shrink-0">
                         <h2 class="text-sm sm:text-base font-bold uppercase tracking-wider">CikguScan OMR</h2>
@@ -398,7 +472,6 @@
                     </div>
                     
                     <div class="w-full relative border-[2px] sm:border-[3px] border-black mx-auto" style="max-width: ${safeMaxWidth}px;">
-                        
                         <!-- 4 Titik Hitam Auto-Snap -->
                         <div class="marker-corner absolute top-0 left-0 w-4 h-4 sm:w-5 sm:h-5 bg-black z-10" style="transform: translate(-50%, -50%);"></div>
                         <div class="marker-corner absolute top-0 right-0 w-4 h-4 sm:w-5 sm:h-5 bg-black z-10" style="transform: translate(50%, -50%);"></div>
