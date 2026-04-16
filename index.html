@@ -86,7 +86,7 @@
                     <h2 class="text-lg font-bold">Cetak Borang OMR</h2>
                     <p class="text-sm text-gray-600 mb-4">
                         Format automatik <b>A4 Landscape</b>.<br>
-                        <span class="text-xs">(1-5 soalan: 6 set per muka surat | 6-15 soalan: 4 set per muka surat | 16-40 soalan: 3 set per muka surat)</span>
+                        <span class="text-xs">(1-5 soalan: 6 set | 6-15 soalan: 4 set | 16-40 soalan: 3 set)</span>
                     </p>
                     <button onclick="window.print()" class="w-full bg-blue-500 text-white font-bold py-3 rounded-lg shadow hover:bg-blue-600 transition mb-4">
                         🖨️ Tekan Untuk Cetak
@@ -252,26 +252,22 @@
             }
             
             if (sets === 6) {
-                // 3 Lajur, 2 Baris. Landscape.
                 bekas.className = "grid grid-cols-3 gap-4 print:gap-x-6 print:gap-y-6 w-full";
                 bekas.style.height = "18cm";
                 bekas.style.gridTemplateRows = "1fr 1fr";
             } else if (sets === 4) {
-                // 4 Lajur, 1 Baris. Landscape.
                 bekas.className = "grid grid-cols-4 gap-4 print:gap-4 w-full";
                 bekas.style.height = "18cm";
                 bekas.style.gridTemplateRows = "1fr";
             } else {
-                // 3 Lajur, 1 Baris. Landscape.
                 bekas.className = "grid grid-cols-3 gap-4 print:gap-6 w-full";
                 bekas.style.height = "18cm";
                 bekas.style.gridTemplateRows = "1fr";
             }
 
-            // PENGIRAAN MATEMATIK SELAMAT (Safe Max Width)
-            // Dikurangkan nilai availableHeight supaya kotak OMR tidak terkeluar (overflow) ke muka surat 2.
-            let availableHeight = (sets === 6) ? 280 : 520; 
-            let safeMaxWidth = Math.min(260, Math.floor(availableHeight / (JUMLAH_SOALAN * 0.12)));
+            // NISBAH DINAMIK: Mengelakkan kotak menjadi kurus.
+            // Baris semakin rendah bila soalan banyak, tapi kelebaran kotak kekal cantik 100%.
+            let ratio = JUMLAH_SOALAN <= 15 ? 10 : (JUMLAH_SOALAN <= 30 ? 7 : 5.5);
 
             for (let s = 0; s < sets; s++) {
                 let divSet = document.createElement('div');
@@ -279,19 +275,23 @@
                 
                 let soalanHtml = '';
                 for (let i = 0; i < JUMLAH_SOALAN; i++) {
+                    
+                    // Skala bulatan bertukar kepada h-[75%] supaya bersandar pada ketinggian, mengelakkan tumpah.
                     let htmlBulatan = PILIHAN.map(p => `
-                        <div class="w-[20%] h-full flex items-center justify-center">
-                            <div class="w-[40%] aspect-square border-[3px] border-black rounded-full flex items-center justify-center font-bold text-[8px] sm:text-[10px] text-gray-400">
+                        <div class="flex-1 h-full flex items-center justify-center">
+                            <div class="h-[75%] aspect-square border-[2px] border-black rounded-full flex items-center justify-center font-bold text-[8px] sm:text-[10px] text-gray-400">
                                 ${p}
                             </div>
                         </div>
                     `).join('');
 
                     soalanHtml += `
-                        <div class="w-full relative border-b-4 border-black box-border bg-white" style="padding-top: 12%;">
+                        <div class="w-full relative border-b-[2px] border-black box-border bg-white" style="padding-top: ${ratio}%;">
                             <div class="absolute inset-0 flex w-full h-full">
-                                <div class="w-[20%] h-full flex items-center justify-end pr-2 font-bold border-r-4 border-black text-xs sm:text-sm">${i + 1}.</div>
-                                ${htmlBulatan}
+                                <div class="w-[20%] h-full flex items-center justify-end pr-2 font-bold border-r-[2px] border-black text-xs sm:text-sm">${i + 1}.</div>
+                                <div class="w-[80%] flex">
+                                    ${htmlBulatan}
+                                </div>
                             </div>
                         </div>
                     `;
@@ -310,8 +310,8 @@
                         Pastikan KOTAK HITAM di bawah masuk penuh dalam panduan kamera
                     </div>
                     
-                    <!-- Grid Soalan untuk Cetakan (Strict Mathematics) -->
-                    <div class="w-full border-4 border-black border-b-0 mx-auto" style="max-width: ${safeMaxWidth}px;">
+                    <!-- Kotak soalan kini akan memanjang ke bawah tetapi mengekalkan kelebaran yang selesa -->
+                    <div class="w-full border-[2px] sm:border-[3px] border-black border-b-0 mx-auto" style="max-width: 95%;">
                         ${soalanHtml}
                     </div>
 
@@ -324,27 +324,29 @@
         }
 
         // ==========================================
-        // MATEMATIK GEOMETRI OMR
+        // MATEMATIK GEOMETRI OMR (SELARAS DENGAN CETAKAN)
         // ==========================================
         function dapatkanGeometriOMR(cw, ch) {
             let boxW = cw * 0.85; // Kotak ambil 85% lebar skrin
-            let rowHeight = boxW * 0.12; // MESTI SAMA DENGAN padding-top 12% di kod cetakan
+            
+            // Nisbah dinamik diselaraskan tepat dengan fungsi cetakan
+            let ratio = JUMLAH_SOALAN <= 15 ? 0.10 : (JUMLAH_SOALAN <= 30 ? 0.07 : 0.055);
+            let rowHeight = boxW * ratio; 
             let boxH = rowHeight * JUMLAH_SOALAN;
 
-            // Kalau soalan terlampau banyak, kecilkan kotak supaya muat dalam skrin telefon
+            // Jika tinggi kotak melebihi skrin, laraskan supaya muat
             if (boxH > ch * 0.85) {
                 boxH = ch * 0.85;
                 rowHeight = boxH / JUMLAH_SOALAN;
-                boxW = rowHeight / 0.12;
+                boxW = rowHeight / ratio;
             }
 
             const boxX = (cw - boxW) / 2;
             const boxY = (ch - boxH) / 2;
 
-            // Posisi tepat X berdasarkan w-[20%] di cetakan
-            // Kolum nombor=20%, A=20%, B=20%, C=20%, D=20%. Titik tengah = 20% + separuh saiz (10%)
+            // X offsets tepat di tengah slot 20% bagi setiap pilihan
             const posXPilihan = [
-                boxX + boxW * 0.30, // A
+                boxX + boxW * 0.30, // A (20% offset + 10%)
                 boxX + boxW * 0.50, // B
                 boxX + boxW * 0.70, // C
                 boxX + boxW * 0.90  // D
@@ -438,8 +440,8 @@
             ctx.lineWidth = 4;
             ctx.strokeRect(geo.boxX, geo.boxY, geo.boxW, geo.boxH);
 
-            // Lukis bayang bulatan dan grid line
-            const r = geo.boxW * 0.04; // Saiz bulatan ghost (diselaraskan dengan saiz baru cetakan)
+            // Saiz bulatan ghost bergantung pada ketinggian baris, bukan lagi lebar kotak
+            const r = geo.rowHeight * 0.35; 
             
             for (let i = 0; i < JUMLAH_SOALAN; i++) {
                 let cy = geo.boxY + (i * geo.rowHeight) + (geo.rowHeight / 2);
@@ -502,7 +504,7 @@
 
             let markah = 0;
             let butiran = [];
-            const r = geo.boxW * 0.03; // Sampling radius dikecilkan supaya muat dalam bulatan jawapan baru
+            const r = geo.rowHeight * 0.35; // Sampling bersandar pada tinggi
 
             for (let i = 0; i < JUMLAH_SOALAN; i++) {
                 let cy = geo.boxY + (i * geo.rowHeight) + (geo.rowHeight / 2);
