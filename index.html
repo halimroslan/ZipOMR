@@ -152,7 +152,7 @@
                             <p class="text-xs text-apple-textMuted mt-1">Maksimum 40 soalan untuk satu kertas.</p>
                         </div>
                         <div class="flex items-center gap-2">
-                            <input type="number" id="input-jumlah-soalan" value="30" min="1" max="40" class="w-20 text-center p-2.5 text-lg font-semibold bg-apple-bg border border-apple-border rounded-xl focus:outline-none focus:ring-2 focus:ring-apple-blue/50 transition-all" onchange="kemaskiniJumlahSoalan()">
+                            <input type="number" id="input-jumlah-soalan" value="40" min="1" max="40" class="w-20 text-center p-2.5 text-lg font-semibold bg-apple-bg border border-apple-border rounded-xl focus:outline-none focus:ring-2 focus:ring-apple-blue/50 transition-all" onchange="kemaskiniJumlahSoalan()">
                         </div>
                     </div>
 
@@ -235,7 +235,7 @@
                     <p class="text-apple-textMuted text-sm font-semibold tracking-widest uppercase">Markah Diperoleh</p>
                     <div class="flex items-baseline justify-center gap-2 mt-2">
                         <span class="text-7xl font-bold tracking-tighter text-apple-text" id="skor-markah">0</span>
-                        <span class="text-2xl font-medium text-apple-textMuted" id="skor-total">/30</span>
+                        <span class="text-2xl font-medium text-apple-textMuted" id="skor-total">/40</span>
                     </div>
                     <div class="mt-4 inline-block bg-apple-bg px-4 py-1.5 rounded-full">
                         <p class="text-base font-semibold text-apple-blue" id="skor-peratus">0%</p>
@@ -270,7 +270,7 @@
     </div>
 
     <script>
-        let JUMLAH_SOALAN = 30;
+        let JUMLAH_SOALAN = 40;
         const PILIHAN = ['A', 'B', 'C', 'D'];
         let skemaJawapan = Array(JUMLAH_SOALAN).fill(null);
         let streamKamera = null;
@@ -288,8 +288,8 @@
                 styleTag.id = 'dynamic-print-style';
                 document.head.appendChild(styleTag);
             }
-            // 1-30 soalan: Portrait | >30 soalan: Landscape
-            if (JUMLAH_SOALAN <= 30) {
+            // 1-20 soalan: Portrait | >20 soalan: Landscape
+            if (JUMLAH_SOALAN <= 20) {
                 styleTag.innerHTML = "@media print { @page { size: A4 portrait; margin: 15mm; } }";
             } else {
                 styleTag.innerHTML = "@media print { @page { size: A4 landscape; margin: 15mm; } }";
@@ -436,7 +436,7 @@
         }
 
         // ==========================================
-        // HELPER: BARIS SOALAN 21-30 (2 Lajur Lebar)
+        // HELPER: BARIS SOALAN 21-30 (Landscape 2 Lajur)
         // ==========================================
         function binaBarisSoalan30(index, skemaJawapanList = null) {
             if (index >= JUMLAH_SOALAN) return `<div class="w-full" style="height: ${100/15}%;"></div>`;
@@ -470,53 +470,51 @@
         }
 
         function getFormHTMLTemplate30(skemaJawapanList = null) {
-            let col1 = '';
-            let col2 = '';
+            let col1 = '', col2 = '';
             for (let i = 0; i < 15; i++) col1 += binaBarisSoalan30(i, skemaJawapanList);
             for (let i = 15; i < 30; i++) col2 += binaBarisSoalan30(i, skemaJawapanList);
 
             return `
-            <div class="w-full relative mx-auto border-[2px] border-transparent" style="aspect-ratio: 1 / 0.75; font-family: 'Inter', sans-serif;">
-                <div class="marker-corner absolute top-0 left-0 w-[14px] h-[14px] sm:w-[16px] sm:h-[16px] bg-black z-10" style="transform: translate(-50%, -50%);"></div>
-                <div class="marker-corner absolute top-[50%] left-0 w-[14px] h-[14px] sm:w-[16px] sm:h-[16px] bg-black z-10" style="transform: translate(-50%, -50%);"></div>
-                <div class="marker-corner absolute bottom-0 left-0 w-[14px] h-[14px] sm:w-[16px] sm:h-[16px] bg-black z-10" style="transform: translate(-50%, 50%);"></div>
-                <div class="marker-corner absolute top-0 right-0 w-[14px] h-[14px] sm:w-[16px] sm:h-[16px] bg-black z-10" style="transform: translate(50%, -50%);"></div>
-                <div class="marker-corner absolute top-[50%] right-0 w-[14px] h-[14px] sm:w-[16px] sm:h-[16px] bg-black z-10" style="transform: translate(50%, -50%);"></div>
-                <div class="marker-corner absolute bottom-0 right-0 w-[14px] h-[14px] sm:w-[16px] sm:h-[16px] bg-black z-10" style="transform: translate(50%, 50%);"></div>
+                <div class="w-full relative mx-auto border-[2px] border-transparent" style="aspect-ratio: 1 / 1.35; font-family: 'Inter', sans-serif;">
+                    <div class="marker-corner absolute top-0 left-0 w-[14px] h-[14px] sm:w-[16px] sm:h-[16px] bg-black z-10" style="transform: translate(-50%, -50%);"></div>
+                    <div class="marker-corner absolute top-[50%] left-0 w-[14px] h-[14px] sm:w-[16px] sm:h-[16px] bg-black z-10" style="transform: translate(-50%, -50%);"></div>
+                    <div class="marker-corner absolute bottom-0 left-0 w-[14px] h-[14px] sm:w-[16px] sm:h-[16px] bg-black z-10" style="transform: translate(-50%, 50%);"></div>
+                    <div class="marker-corner absolute top-0 right-0 w-[14px] h-[14px] sm:w-[16px] sm:h-[16px] bg-black z-10" style="transform: translate(50%, -50%);"></div>
+                    <div class="marker-corner absolute top-[50%] right-0 w-[14px] h-[14px] sm:w-[16px] sm:h-[16px] bg-black z-10" style="transform: translate(50%, -50%);"></div>
+                    <div class="marker-corner absolute bottom-0 right-0 w-[14px] h-[14px] sm:w-[16px] sm:h-[16px] bg-black z-10" style="transform: translate(50%, 50%);"></div>
 
-                <div class="absolute inset-0 flex flex-col p-[5%]">
-                    <div class="h-[25%] flex flex-col w-[55%]">
-                        <div class="flex-1 flex flex-col mb-1.5">
-                            <div class="text-[13px] sm:text-[15px] mb-0.5 font-medium text-black">Nama</div>
-                            <div class="flex-1 border-[2px] border-black w-full"></div>
+                    <div class="absolute inset-0 flex flex-col p-[5%]">
+                        <div class="h-[20%] flex flex-col w-[100%]">
+                            <div class="flex w-full justify-between items-end h-full pb-2">
+                                <div class="w-[60%] flex flex-col">
+                                    <div class="text-[13px] sm:text-[15px] mb-1 font-medium text-black">Nama</div>
+                                    <div class="w-full h-8 border-[2px] border-black"></div>
+                                </div>
+                                <div class="w-[35%] flex flex-col">
+                                    <div class="text-[13px] sm:text-[15px] mb-1 font-medium text-black">Kelas</div>
+                                    <div class="w-full h-8 border-[2px] border-black"></div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="flex-1 flex flex-col">
-                            <div class="text-[13px] sm:text-[15px] mb-0.5 font-medium text-black">Kelas</div>
-                            <div class="flex-1 border-[2px] border-black w-full"></div>
+                        <div class="h-[80%] flex justify-between">
+                            <div class="w-[48%] flex flex-col h-full">${col1}</div>
+                            <div class="w-[48%] flex flex-col h-full">${col2}</div>
                         </div>
-                    </div>
-                    <div class="h-[5%]"></div>
-                    <div class="h-[70%] flex justify-between">
-                        <div class="w-[48%] flex flex-col h-full">${col1}</div>
-                        <div class="w-[48%] flex flex-col h-full">${col2}</div>
                     </div>
                 </div>
-            </div>
             `;
         }
 
         // ==========================================
-        // HELPER: BARIS SOALAN 31-40 (3 Lajur)
+        // HELPER: BARIS SOALAN 31-40 (Split 2 Blok Atas Bawah)
         // ==========================================
-        function binaBarisSoalan(index, ratioVal, skemaJawapanList = null) {
-            if (index >= JUMLAH_SOALAN) {
-                return `<div class="w-full flex box-border shrink-0 mb-1" style="aspect-ratio: 100 / ${ratioVal};"></div>`;
-            }
+        function binaBarisSoalan40(index, totalRowsInBlock, skemaJawapanList = null) {
+            if (index >= JUMLAH_SOALAN) return `<div class="w-full" style="height: ${100/totalRowsInBlock}%;"></div>`;
 
             let htmlBulatan = PILIHAN.map(p => {
                 let fillCircle = "white";
-                let fillText = "#9CA3AF"; 
-                let strokeColor = "#D1D5DB"; 
+                let fillText = "#9CA3AF";
+                let strokeColor = "#D1D5DB";
                 if (skemaJawapanList) {
                     let isJawapan = (skemaJawapanList[index] === p);
                     fillCircle = isJawapan ? "black" : "white";
@@ -524,8 +522,8 @@
                     strokeColor = isJawapan ? "black" : "#D1D5DB";
                 }
                 return `
-                <div class="flex-1 h-full flex items-center justify-center">
-                    <svg viewBox="0 0 100 100" style="height: 80%; aspect-ratio: 1/1;">
+                <div class="flex-1 flex items-center justify-center h-full">
+                    <svg viewBox="0 0 100 100" style="height: 85%; aspect-ratio: 1/1;">
                         <circle cx="50" cy="50" r="45" stroke="${strokeColor}" stroke-width="3" fill="${fillCircle}" />
                         <text x="50" y="50" dy=".35em" text-anchor="middle" font-size="46" font-family="'Inter', sans-serif" font-weight="400" fill="${fillText}">${p}</text>
                     </svg>
@@ -533,68 +531,74 @@
             }).join('');
 
             return `
-            <div class="w-full flex box-border shrink-0 mb-1.5" style="aspect-ratio: 100 / ${ratioVal};">
-                <div class="w-[20%] h-full flex items-center justify-end pr-2 text-[10px] sm:text-[12px] text-black" style="font-family: 'Inter', sans-serif;">
-                    ${index + 1}
-                </div>
-                <div class="w-[80%] h-full flex items-center justify-between">
+            <div class="flex items-center w-full" style="height: ${100/totalRowsInBlock}%;">
+                <div class="w-[18%] text-right pr-1 sm:pr-2 text-[10px] sm:text-[12px] text-black font-medium">${index + 1}</div>
+                <div class="w-[82%] flex justify-between h-[85%]">
                     ${htmlBulatan}
                 </div>
             </div>`;
         }
 
         function getFormHTMLTemplate40(skemaJawapanList = null) {
-            let col1 = '', col2 = '', col3 = '';
-            let ratio = 18; 
-            
-            for (let i = 0; i < 17; i++) col1 += binaBarisSoalan(i, ratio, skemaJawapanList);
-            for (let i = 17; i < 34; i++) col2 += binaBarisSoalan(i, ratio, skemaJawapanList);
-            for (let i = 34; i < 40; i++) col3 += binaBarisSoalan(i, ratio, skemaJawapanList);
+            let col1Top = '', col1Bot = '';
+            let col2Top = '', col2Bot = '';
+            let col3Top = '', col3Bot = '';
+
+            for (let i = 0; i < 7; i++) col1Top += binaBarisSoalan40(i, 7, skemaJawapanList);
+            for (let i = 7; i < 15; i++) col1Bot += binaBarisSoalan40(i, 8, skemaJawapanList);
+
+            for (let i = 15; i < 22; i++) col2Top += binaBarisSoalan40(i, 7, skemaJawapanList);
+            for (let i = 22; i < 30; i++) col2Bot += binaBarisSoalan40(i, 8, skemaJawapanList);
+
+            for (let i = 30; i < 37; i++) col3Top += binaBarisSoalan40(i, 7, skemaJawapanList);
+            for (let i = 37; i < 40; i++) col3Bot += binaBarisSoalan40(i, 8, skemaJawapanList);
 
             return `
-                <div class="w-full flex flex-col items-center shrink-0 mb-4 px-2" style="font-family: 'Inter', sans-serif;">
-                    <div class="flex w-full justify-between items-end">
-                        <div class="w-[60%] flex flex-col">
-                            <div class="text-[13px] mb-1 text-black font-medium">Nama</div>
-                            <div class="w-full h-8 border-[2px] border-black"></div>
+            <div class="w-full relative mx-auto border-[2px] border-transparent" style="aspect-ratio: 1 / 1.35; font-family: 'Inter', sans-serif;">
+                <div class="marker-corner absolute top-0 left-0 w-[14px] h-[14px] sm:w-[16px] sm:h-[16px] bg-black z-10" style="transform: translate(-50%, -50%);"></div>
+                <div class="marker-corner absolute top-[50%] left-0 w-[14px] h-[14px] sm:w-[16px] sm:h-[16px] bg-black z-10" style="transform: translate(-50%, -50%);"></div>
+                <div class="marker-corner absolute bottom-0 left-0 w-[14px] h-[14px] sm:w-[16px] sm:h-[16px] bg-black z-10" style="transform: translate(-50%, 50%);"></div>
+                <div class="marker-corner absolute top-0 right-0 w-[14px] h-[14px] sm:w-[16px] sm:h-[16px] bg-black z-10" style="transform: translate(50%, -50%);"></div>
+                <div class="marker-corner absolute top-[50%] right-0 w-[14px] h-[14px] sm:w-[16px] sm:h-[16px] bg-black z-10" style="transform: translate(50%, -50%);"></div>
+                <div class="marker-corner absolute bottom-0 right-0 w-[14px] h-[14px] sm:w-[16px] sm:h-[16px] bg-black z-10" style="transform: translate(50%, 50%);"></div>
+
+                <!-- Penanda di tengah antara col 1 & 2 -->
+                <div class="marker-corner absolute top-[20%] left-[34%] w-[10px] h-[10px] sm:w-[12px] sm:h-[12px] bg-black z-10" style="transform: translate(-50%, -50%);"></div>
+                <div class="marker-corner absolute top-[56%] left-[34%] w-[10px] h-[10px] sm:w-[12px] sm:h-[12px] bg-black z-10" style="transform: translate(-50%, -50%);"></div>
+                <div class="marker-corner absolute bottom-0 left-[34%] w-[10px] h-[10px] sm:w-[12px] sm:h-[12px] bg-black z-10" style="transform: translate(-50%, 50%);"></div>
+
+                <div class="absolute inset-0 flex flex-col p-[5%]">
+                    <div class="h-[20%] flex flex-col w-[100%]">
+                        <div class="flex w-full justify-between items-end h-full pb-2">
+                            <div class="w-[60%] flex flex-col">
+                                <div class="text-[13px] sm:text-[15px] mb-1 font-medium text-black">Nama</div>
+                                <div class="w-full h-8 border-[2px] border-black"></div>
+                            </div>
+                            <div class="w-[35%] flex flex-col">
+                                <div class="text-[13px] sm:text-[15px] mb-1 font-medium text-black">Kelas</div>
+                                <div class="w-full h-8 border-[2px] border-black"></div>
+                            </div>
                         </div>
-                        <div class="w-[35%] flex flex-col">
-                            <div class="text-[13px] mb-1 text-black font-medium">Kelas</div>
-                            <div class="w-full h-8 border-[2px] border-black"></div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="w-full relative border-[2px] border-transparent mx-auto">
-                    <div class="marker-corner absolute top-0 left-0 w-[14px] h-[14px] sm:w-[16px] sm:h-[16px] bg-black z-10" style="transform: translate(-50%, -50%);"></div>
-                    <div class="marker-corner absolute top-[50%] left-0 w-[14px] h-[14px] sm:w-[16px] sm:h-[16px] bg-black z-10" style="transform: translate(-50%, -50%);"></div>
-                    <div class="marker-corner absolute bottom-0 left-0 w-[14px] h-[14px] sm:w-[16px] sm:h-[16px] bg-black z-10" style="transform: translate(-50%, 50%);"></div>
-                    <div class="marker-corner absolute top-0 right-0 w-[14px] h-[14px] sm:w-[16px] sm:h-[16px] bg-black z-10" style="transform: translate(50%, -50%);"></div>
-                    <div class="marker-corner absolute top-[50%] right-0 w-[14px] h-[14px] sm:w-[16px] sm:h-[16px] bg-black z-10" style="transform: translate(50%, -50%);"></div>
-                    <div class="marker-corner absolute bottom-0 right-0 w-[14px] h-[14px] sm:w-[16px] sm:h-[16px] bg-black z-10" style="transform: translate(50%, 50%);"></div>
-                    
-                    <div class="marker-corner absolute top-0 left-[34%] w-[10px] h-[10px] sm:w-[12px] sm:h-[12px] bg-black z-10" style="transform: translate(-50%, -50%);"></div>
-                    <div class="marker-corner absolute bottom-0 left-[34%] w-[10px] h-[10px] sm:w-[12px] sm:h-[12px] bg-black z-10" style="transform: translate(-50%, 50%);"></div>
-                    
-                    <div class="absolute left-0 top-[20%] bottom-[20%] w-[14px] sm:w-[16px] flex flex-col justify-around py-4 z-10" style="transform: translateX(-50%);">
-                        <div class="h-1.5 w-full bg-black"></div>
-                        <div class="h-1.5 w-full bg-black"></div>
-                        <div class="h-1.5 w-full bg-black"></div>
-                        <div class="h-1.5 w-full bg-black"></div>
-                        <div class="h-1.5 w-full bg-black"></div>
-                        <div class="h-1.5 w-full bg-black"></div>
-                        <div class="h-1.5 w-full bg-black"></div>
-                        <div class="h-1.5 w-full bg-black"></div>
                     </div>
 
-                    <div class="w-full" style="padding: 5%;">
-                        <div class="flex w-full justify-between">
-                            <div class="w-[32%] flex flex-col">${col1}</div>
-                            <div class="w-[32%] flex flex-col">${col2}</div>
-                            <div class="w-[32%] flex flex-col">${col3}</div>
+                    <div class="h-[80%] flex flex-col w-full">
+                        <!-- Blok Atas -->
+                        <div class="flex w-full justify-between" style="height: 41.17%;">
+                            <div class="w-[32%] flex flex-col">${col1Top}</div>
+                            <div class="w-[32%] flex flex-col">${col2Top}</div>
+                            <div class="w-[32%] flex flex-col">${col3Top}</div>
+                        </div>
+                        <!-- Ruang Pemisah -->
+                        <div class="w-full" style="height: 11.76%;"></div>
+                        <!-- Blok Bawah -->
+                        <div class="flex w-full justify-between" style="height: 47.07%;">
+                            <div class="w-[32%] flex flex-col">${col1Bot}</div>
+                            <div class="w-[32%] flex flex-col">${col2Bot}</div>
+                            <div class="w-[32%] flex flex-col">${col3Bot}</div>
                         </div>
                     </div>
                 </div>
+            </div>
             `;
         }
 
@@ -741,11 +745,11 @@
                     bekas.appendChild(divSet);
                 }
             } else if (JUMLAH_SOALAN <= 30) {
-                bekas.className = "flex flex-col gap-16 print:gap-24 w-full px-4 print:px-8";
+                bekas.className = "grid grid-cols-2 gap-16 print:gap-24 w-full px-8";
                 bekas.style.height = "auto";
                 for(let s=0; s<2; s++) {
                     let divSet = document.createElement('div');
-                    divSet.className = "bg-white flex flex-col justify-start print:border-none break-inside-avoid print:break-inside-avoid max-w-[550px] mx-auto w-full";
+                    divSet.className = "bg-white flex flex-col justify-start print:border-none break-inside-avoid print:break-inside-avoid max-w-[480px] mx-auto w-full";
                     divSet.innerHTML = getFormHTMLTemplate30(skemaJawapan);
                     bekas.appendChild(divSet);
                 }
@@ -794,20 +798,20 @@
                     bekas.appendChild(divSet);
                 }
             } else if (JUMLAH_SOALAN <= 30) {
-                labelOrientasi.innerText = "A4 Portrait (2 Borang / Kertas)";
-                if(textDesc) textDesc.innerHTML = 'Rekaan khas 30 soalan (2 Lajur lebar).<br><span class="text-xs mt-2 block opacity-80">(Dicetak 2 borang atas dan bawah pada kertas A4 Portrait)</span>';
+                labelOrientasi.innerText = "A4 Landscape (2 Borang / Kertas)";
+                if(textDesc) textDesc.innerHTML = 'Rekaan khas 30 soalan (2 Lajur).<br><span class="text-xs mt-2 block opacity-80">(Dicetak sebelah-menyebelah pada kertas A4)</span>';
 
-                bekas.className = "flex flex-col gap-16 print:gap-24 w-full px-4 print:px-8";
+                bekas.className = "grid grid-cols-2 gap-16 print:gap-24 w-full px-8";
                 bekas.style.height = "auto"; 
                 for (let s = 0; s < 2; s++) {
                     let divSet = document.createElement('div');
-                    divSet.className = "bg-white flex flex-col justify-start print:border-none break-inside-avoid print:break-inside-avoid max-w-[550px] mx-auto w-full";
+                    divSet.className = "bg-white flex flex-col justify-start print:border-none break-inside-avoid print:break-inside-avoid max-w-[480px] mx-auto w-full";
                     divSet.innerHTML = getFormHTMLTemplate30(null);
                     bekas.appendChild(divSet);
                 }
             } else {
                 labelOrientasi.innerText = "A4 Landscape (2 Borang / Kertas)";
-                if(textDesc) textDesc.innerHTML = 'Rekaan khas 40 soalan (3 Lajur) persis format peperiksaan sebenar.<br><span class="text-xs mt-2 block opacity-80">(Dicetak sebelah-menyebelah pada kertas A4)</span>';
+                if(textDesc) textDesc.innerHTML = 'Rekaan khas 40 soalan terpisah (Atas & Bawah).<br><span class="text-xs mt-2 block opacity-80">(Dicetak sebelah-menyebelah pada kertas A4)</span>';
 
                 bekas.className = "grid grid-cols-2 gap-16 print:gap-24 w-full px-8";
                 bekas.style.height = "auto"; 
@@ -835,7 +839,6 @@
             }
         }
 
-        // GEOMETRI UNTUK 1-10 SOALAN
         function dapatkanGeometriOMR10(cw, ch) {
             let boxW = cw * 0.70;
             let boxH = boxW * 1.35; 
@@ -872,10 +875,9 @@
                 return { cy: cY, posX: posX };
             }
 
-            return { boxX, boxY, boxW, boxH, rowHeight, getPilihanGeometri, numCols: 1 };
+            return { boxX, boxY, boxW, boxH, rowHeight, getPilihanGeometri, layout: '10' };
         }
 
-        // GEOMETRI UNTUK 11-20 SOALAN
         function dapatkanGeometriOMR20(cw, ch) {
             let boxW = cw * 0.70;
             let boxH = boxW * 1.35; 
@@ -918,67 +920,17 @@
                 return { cy: cY, posX: posX };
             }
 
-            return { boxX, boxY, boxW, boxH, rowHeight, getPilihanGeometri, numCols: 2, innerX, innerW, colW, trueQuestionStartY, trueQuestionAreaH };
+            return { boxX, boxY, boxW, boxH, rowHeight, getPilihanGeometri, innerX, innerW, trueQuestionStartY, trueQuestionAreaH, layout: '20' };
         }
 
-        // GEOMETRI UNTUK 21-30 SOALAN (Baru)
         function dapatkanGeometriOMR30(cw, ch) {
-            let boxW = cw * 0.85;
-            let boxH = boxW * 0.75; 
-            if (boxH > ch * 0.85) {
-                boxH = ch * 0.85;
-                boxW = boxH / 0.75;
-            }
-            const boxX = (cw - boxW) / 2;
-            const boxY = (ch - boxH) / 2;
-
-            let paddingX = boxW * 0.05;
-            let paddingY = boxH * 0.05;
-            let innerW = boxW * 0.90;
-            let innerH = boxH * 0.90;
-
-            let innerX = boxX + paddingX;
-
-            let trueQuestionStartY = boxY + paddingY + (innerH * 0.30);
-            let trueQuestionAreaH = innerH * 0.70;
-            let rowHeight = trueQuestionAreaH / 15; 
-
-            let colW = innerW * 0.48; 
-
-            function getPilihanGeometri(soalanIndex) {
-                let col = Math.floor(soalanIndex / 15);
-                let row = soalanIndex % 15;
-
-                let cY = trueQuestionStartY + (row * rowHeight) + (rowHeight / 2);
-                let cXOffset = (col === 0) ? 0 : (innerW - colW);
-                let colX = innerX + cXOffset;
-
-                let bubbleAreaW = colW * 0.82; 
-                let bubbleAreaX = colX + (colW * 0.18); 
-
-                let posX = [
-                    bubbleAreaX + bubbleAreaW * 0.125,
-                    bubbleAreaX + bubbleAreaW * 0.375,
-                    bubbleAreaX + bubbleAreaW * 0.625,
-                    bubbleAreaX + bubbleAreaW * 0.875
-                ];
-
-                return { cy: cY, posX: posX };
-            }
-
-            return { boxX, boxY, boxW, boxH, rowHeight, getPilihanGeometri, numCols: 2, innerX, innerW, colW, trueQuestionStartY, trueQuestionAreaH };
-        }
-
-        // GEOMETRI UNTUK 31-40 SOALAN
-        function dapatkanGeometriOMR40(cw, ch) {
             let boxW = cw * 0.85; 
-            let numCols = 3;
-            let rowsPerCol = 17;
+            let rowsPerCol = 15;
             
             const padPct = 0.05; 
             let padding = boxW * padPct;
             let innerBoxW = boxW - (padding * 2);
-            let cssColW = innerBoxW * 0.32; 
+            let cssColW = innerBoxW * 0.48; 
             
             let ratio = 0.18; 
             let rowHeight = cssColW * ratio; 
@@ -1007,8 +959,7 @@
 
                 let cXOffset = 0;
                 if (col === 0) cXOffset = 0;
-                else if (col === 1) cXOffset = (innerBoxW - cssColW) / 2;
-                else if (col === 2) cXOffset = innerBoxW - cssColW;
+                else if (col === 1) cXOffset = innerBoxW - cssColW;
 
                 let cX = innerBoxX + cXOffset;
                 let cY = innerBoxY + (row * rowHeight) + (rowHeight / 2);
@@ -1023,7 +974,68 @@
                 return { cy: cY, posX: posX };
             }
 
-            return { boxX, boxY, boxW, boxH, rowHeight, colW: cssColW, getPilihanGeometri, innerBoxW, innerBoxX, innerBoxY, innerBoxH, numCols: 3 };
+            return { boxX, boxY, boxW, boxH, rowHeight, getPilihanGeometri, innerBoxW, innerBoxX, innerBoxY, innerBoxH, layout: '30' };
+        }
+
+        function dapatkanGeometriOMR40(cw, ch) {
+            let boxW = cw * 0.70;
+            let boxH = boxW * 1.35;
+            if (boxH > ch * 0.85) {
+                boxH = ch * 0.85;
+                boxW = boxH / 1.35;
+            }
+            const boxX = (cw - boxW) / 2;
+            const boxY = (ch - boxH) / 2;
+
+            let paddingX = boxW * 0.05;
+            let paddingY = boxH * 0.05;
+            let innerW = boxW * 0.90;
+            let innerH = boxH * 0.90;
+
+            let innerX = boxX + paddingX;
+            let innerY = boxY + paddingY;
+
+            let headerH = innerH * 0.20;
+            let gridY = innerY + headerH;
+            let gridH = innerH * 0.80;
+
+            // 7 baris Atas + 2 ruang kosong + 8 baris Bawah = 17 baris
+            let rowHeight = gridH / 17; 
+            let colW = innerW * 0.32;
+
+            function getPilihanGeometri(soalanIndex) {
+                let col, row, isTopBlock;
+                let n = soalanIndex + 1;
+
+                if (n >= 1 && n <= 7) { col = 0; row = n - 1; isTopBlock = true; }
+                else if (n >= 8 && n <= 15) { col = 0; row = n - 8; isTopBlock = false; }
+                else if (n >= 16 && n <= 22) { col = 1; row = n - 16; isTopBlock = true; }
+                else if (n >= 23 && n <= 30) { col = 1; row = n - 23; isTopBlock = false; }
+                else if (n >= 31 && n <= 37) { col = 2; row = n - 31; isTopBlock = true; }
+                else if (n >= 38 && n <= 40) { col = 2; row = n - 38; isTopBlock = false; }
+
+                let cXOffset = 0;
+                if (col === 1) cXOffset = (innerW - colW) / 2;
+                else if (col === 2) cXOffset = innerW - colW;
+
+                let cX = innerX + cXOffset;
+                let blockStartY = isTopBlock ? gridY : (gridY + (9 * rowHeight)); 
+                let cY = blockStartY + (row * rowHeight) + (rowHeight / 2);
+
+                let bubbleAreaW = colW * 0.82;
+                let bubbleAreaX = cX + (colW * 0.18);
+
+                let posX = [
+                    bubbleAreaX + bubbleAreaW * 0.125,
+                    bubbleAreaX + bubbleAreaW * 0.375,
+                    bubbleAreaX + bubbleAreaW * 0.625,
+                    bubbleAreaX + bubbleAreaW * 0.875
+                ];
+
+                return { cy: cY, posX: posX };
+            }
+
+            return { boxX, boxY, boxW, boxH, rowHeight, getPilihanGeometri, layout: '40' };
         }
 
         // ==========================================
@@ -1170,28 +1182,6 @@
                     ctx.stroke();
                 }
             }
-            
-            if (geo.numCols === 2) {
-                let midX = geo.innerX + (geo.innerW / 2);
-                ctx.beginPath();
-                ctx.moveTo(midX, geo.trueQuestionStartY);
-                ctx.lineTo(midX, geo.trueQuestionStartY + geo.trueQuestionAreaH);
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-                ctx.lineWidth = 1;
-                ctx.stroke();
-            } else if (geo.numCols === 3) {
-                let col2X = geo.innerBoxX + (geo.innerBoxW - geo.colW) / 2;
-                let col3X = geo.innerBoxX + geo.innerBoxW - geo.colW;
-                
-                ctx.beginPath();
-                ctx.moveTo(col2X - geo.innerBoxW*0.01, geo.innerBoxY);
-                ctx.lineTo(col2X - geo.innerBoxW*0.01, geo.innerBoxY + geo.innerBoxH);
-                ctx.moveTo(col3X - geo.innerBoxW*0.01, geo.innerBoxY);
-                ctx.lineTo(col3X - geo.innerBoxW*0.01, geo.innerBoxY + geo.innerBoxH);
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-                ctx.lineWidth = 1;
-                ctx.stroke();
-            }
         }
 
         function semakAutoSnap(ctx, geo) {
@@ -1280,24 +1270,6 @@
             ctxDebug.strokeStyle = "rgba(0, 113, 227, 0.4)";
             ctxDebug.lineWidth = 3;
             ctxDebug.strokeRect(geo.boxX, geo.boxY, geo.boxW, geo.boxH);
-            
-            if (geo.numCols === 2) {
-                let midX = geo.innerX + (geo.innerW / 2);
-                ctxDebug.beginPath();
-                ctxDebug.moveTo(midX, geo.trueQuestionStartY);
-                ctxDebug.lineTo(midX, geo.trueQuestionStartY + geo.trueQuestionAreaH);
-                ctxDebug.stroke();
-            } else if (geo.numCols === 3) {
-                let col2X = geo.innerBoxX + (geo.innerBoxW - geo.colW) / 2;
-                let col3X = geo.innerBoxX + geo.innerBoxW - geo.colW;
-                
-                ctxDebug.beginPath();
-                ctxDebug.moveTo(col2X - geo.innerBoxW*0.01, geo.innerBoxY);
-                ctxDebug.lineTo(col2X - geo.innerBoxW*0.01, geo.innerBoxY + geo.innerBoxH);
-                ctxDebug.moveTo(col3X - geo.innerBoxW*0.01, geo.innerBoxY);
-                ctxDebug.lineTo(col3X - geo.innerBoxW*0.01, geo.innerBoxY + geo.innerBoxH);
-                ctxDebug.stroke();
-            }
 
             let markah = 0;
             let butiran = [];
