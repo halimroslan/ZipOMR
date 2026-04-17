@@ -207,7 +207,7 @@
                     <h3 class="text-xl font-semibold mb-2">Format: <span id="label-orientasi" class="text-apple-blue">A4 Landscape</span></h3>
                     <p class="text-sm text-apple-textMuted mb-8 max-w-sm mx-auto">
                         Sistem mengoptimumkan ruang kertas secara automatik.<br>
-                        <span class="text-xs mt-2 block opacity-80">(1-5 Soalan: 6 Set | 6-15: 4 Set | 16-30: 3 Set | 31-40: 2 Set Portrait)</span>
+                        <span class="text-xs mt-2 block opacity-80">(1-5 Soalan: 6 Set | 6-15: 4 Set | 16-30: 3 Set | 31-40: 2 Set Atas-Bawah)</span>
                     </p>
                     <button onclick="window.print()" class="w-full sm:w-auto px-8 bg-apple-blue text-white font-medium text-lg py-3.5 rounded-full shadow-apple-sm hover:bg-apple-blueHover hover:scale-[1.02] active:scale-[0.98] transition-all duration-300">
                         Cetak Kertas OMR
@@ -598,9 +598,9 @@
             } else {
                 styleTag.innerHTML = "@media print { @page { size: A4 portrait; margin: 10mm; } }";
                 labelOrientasi.innerText = "A4 Portrait";
-                bekas.className = "grid grid-cols-2 gap-4 print:gap-8 w-full";
+                bekas.className = "grid grid-cols-1 gap-8 print:gap-12 w-full";
                 bekas.style.height = "26cm"; 
-                bekas.style.gridTemplateRows = "1fr";
+                bekas.style.gridTemplateRows = "1fr 1fr";
             }
 
             let isTwoCols = JUMLAH_SOALAN > 30;
@@ -609,7 +609,7 @@
 
             let availableHeight = 520; 
             if (sets === 6) availableHeight = 280;
-            if (sets === 2) availableHeight = 780; 
+            if (sets === 2) availableHeight = 450; 
 
             let actualRatio = ratio / 100;
             let heightPerColWidth = numRows * actualRatio;
@@ -617,7 +617,7 @@
             
             if (isTwoCols) {
                 safeMaxWidth = Math.floor(availableHeight / (heightPerColWidth / 2));
-                safeMaxWidth = Math.min(320, safeMaxWidth); // Fit on portrait 2 cols
+                safeMaxWidth = Math.min(600, safeMaxWidth); // Boleh dilebarkan untuk Portrait grid-cols-1
             } else {
                 safeMaxWidth = Math.floor(availableHeight / heightPerColWidth);
                 safeMaxWidth = Math.min(280, safeMaxWidth);
@@ -938,6 +938,14 @@
             const ctx = sumberCanvas.getContext('2d', { willReadFrequently: true });
             const cw = sumberCanvas.width;
             const ch = sumberCanvas.height;
+            const geo = dapatkanGeometriOMR(cw, ch);
+
+            const canvasDebug = document.getElementById('canvas-debug');
+            canvasDebug.width = cw;
+            canvasDebug.height = ch;
+            const ctxDebug = canvasDebug.getContext('2d');
+            ctxDebug.drawImage(sumberCanvas, 0, 0);
+
             // Tunjuk kotak sempadan di keputusan
             ctxDebug.strokeStyle = "rgba(0, 113, 227, 0.4)";
             ctxDebug.lineWidth = 3;
