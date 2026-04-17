@@ -1003,52 +1003,38 @@
         }
 
         function dapatkanGeometriOMR30(cw, ch) {
-            let boxW = cw * 0.85; 
-            let rowsPerCol = 15;
-            
-            const padPct = 0.05; 
-            let padding = boxW * padPct;
-            let innerBoxW = boxW - (padding * 2);
-            let cssColW = innerBoxW * 0.48; 
-            
-            let ratio = 0.18; 
-            let rowHeight = cssColW * ratio; 
-            let innerBoxH = rowHeight * rowsPerCol;
-            let boxH = innerBoxH + (padding * 2);
-
+            let boxW = cw * 0.70; 
+            let boxH = boxW * 1.35;
             if (boxH > ch * 0.85) {
-                let scaleFactor = (ch * 0.85) / boxH;
-                boxW *= scaleFactor;
-                padding *= scaleFactor;
-                innerBoxW *= scaleFactor;
-                cssColW *= scaleFactor;
-                rowHeight *= scaleFactor;
-                innerBoxH *= scaleFactor;
                 boxH = ch * 0.85;
+                boxW = boxH / 1.35;
             }
-
             const boxX = (cw - boxW) / 2;
             const boxY = (ch - boxH) / 2;
-            const innerBoxX = boxX + padding;
-            const innerBoxY = boxY + padding;
 
-            let trueQuestionStartY = innerBoxY + (innerBoxH * 0.20); 
-            let trueQuestionAreaH = innerBoxH * 0.80; 
-            rowHeight = trueQuestionAreaH / rowsPerCol;
+            let paddingX = boxW * 0.05; 
+            let paddingY = boxH * 0.05; 
+            let innerW = boxW - (paddingX * 2);
+            let innerH = boxH - (paddingY * 2);
+
+            let innerX = boxX + paddingX;
+
+            let trueQuestionStartY = boxY + paddingY + (innerH * 0.20); 
+            let trueQuestionAreaH = innerH * 0.80; 
+            let rowHeight = trueQuestionAreaH / 15;
+
+            let colW = innerW * 0.48; 
 
             function getPilihanGeometri(soalanIndex) {
-                let col = Math.floor(soalanIndex / rowsPerCol); 
-                let row = soalanIndex % rowsPerCol;
+                let col = Math.floor(soalanIndex / 15);
+                let row = soalanIndex % 15;
 
-                let cXOffset = 0;
-                if (col === 0) cXOffset = 0;
-                else if (col === 1) cXOffset = innerBoxW - cssColW;
-
-                let cX = innerBoxX + cXOffset;
                 let cY = trueQuestionStartY + (row * rowHeight) + (rowHeight / 2);
+                let cXOffset = (col === 0) ? 0 : (innerW - colW);
+                let colX = innerX + cXOffset;
 
-                let bubbleAreaW = cssColW * 0.82; 
-                let bubbleAreaX = cX + (cssColW * 0.18); 
+                let bubbleAreaW = colW * 0.82; 
+                let bubbleAreaX = colX + (colW * 0.18); 
 
                 let posX = [
                     bubbleAreaX + bubbleAreaW * 0.125,
@@ -1060,7 +1046,7 @@
                 return { cy: cY, posX: posX };
             }
 
-            return { boxX, boxY, boxW, boxH, rowHeight, getPilihanGeometri, innerBoxW, innerBoxX, innerBoxY, innerBoxH, trueQuestionStartY, trueQuestionAreaH, cssColW, layout: '30' };
+            return { boxX, boxY, boxW, boxH, rowHeight, getPilihanGeometri, innerX, innerW, colW, trueQuestionStartY, trueQuestionAreaH, layout: '30' };
         }
 
         function dapatkanGeometriOMR40(cw, ch) {
@@ -1270,7 +1256,7 @@
             }
             
             if (geo.layout === '20' || geo.layout === '30') {
-                let midX = geo.layout === '20' ? (geo.innerX + (geo.innerW / 2)) : (geo.innerBoxX + (geo.innerBoxW / 2));
+                let midX = geo.innerX + (geo.innerW / 2);
                 ctx.beginPath();
                 ctx.moveTo(midX, geo.trueQuestionStartY);
                 ctx.lineTo(midX, geo.trueQuestionStartY + geo.trueQuestionAreaH);
@@ -1387,7 +1373,7 @@
             ctxDebug.strokeRect(geo.boxX, geo.boxY, geo.boxW, geo.boxH);
             
             if (geo.layout === '20' || geo.layout === '30') {
-                let midX = geo.layout === '20' ? (geo.innerX + (geo.innerW / 2)) : (geo.innerBoxX + (geo.innerBoxW / 2));
+                let midX = geo.innerX + (geo.innerW / 2);
                 ctxDebug.beginPath();
                 ctxDebug.moveTo(midX, geo.trueQuestionStartY);
                 ctxDebug.lineTo(midX, geo.trueQuestionStartY + geo.trueQuestionAreaH);
@@ -1499,4 +1485,3 @@
     </script>
 </body>
 </html>
-</script>
