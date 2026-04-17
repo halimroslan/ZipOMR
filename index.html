@@ -508,7 +508,7 @@
             let safeMaxWidth;
             if (isTwoCols) {
                 safeMaxWidth = Math.floor(availableHeight / (heightPerColWidth / 2));
-                safeMaxWidth = Math.min(650, safeMaxWidth); 
+                safeMaxWidth = Math.min(550, safeMaxWidth); // Supaya ngam dengan A4 
             } else {
                 safeMaxWidth = Math.floor(availableHeight / heightPerColWidth);
                 safeMaxWidth = Math.min(450, safeMaxWidth); 
@@ -609,7 +609,7 @@
 
             let availableHeight = 520; 
             if (sets === 6) availableHeight = 280;
-            if (sets === 2) availableHeight = 450; 
+            if (sets === 2) availableHeight = 350; // Dikurangkan supaya muat 20 soalan (atas bawah) tanpa terpotong
 
             let actualRatio = ratio / 100;
             let heightPerColWidth = numRows * actualRatio;
@@ -617,7 +617,7 @@
             
             if (isTwoCols) {
                 safeMaxWidth = Math.floor(availableHeight / (heightPerColWidth / 2));
-                safeMaxWidth = Math.min(600, safeMaxWidth); // Boleh dilebarkan untuk Portrait grid-cols-1
+                safeMaxWidth = Math.min(480, safeMaxWidth); // Dikecilkan sikit lebar supaya tinggi turut mengecil
             } else {
                 safeMaxWidth = Math.floor(availableHeight / heightPerColWidth);
                 safeMaxWidth = Math.min(280, safeMaxWidth);
