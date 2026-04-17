@@ -717,7 +717,7 @@
         }
 
         // ==========================================
-        // FUNGSI KAMERA OVERLAY & AUTO-SNAP
+        // FUNGSI KAMERA OVERLAY & AUTO-SNAP (DIOPTIMUMKAN)
         // ==========================================
         async function mulakanKamera() {
             const video = document.getElementById('kamera');
@@ -790,7 +790,8 @@
                 lukisPanduan(ctxO, cw, ch, geo);
 
                 autoSnapCounter++;
-                if (autoSnapCounter > 12) {
+                // Laju: Kurangkan selang frame kepada 8 (daripada 12 sebelum ini) supaya snap lebih pantas
+                if (autoSnapCounter > 8) {
                     autoSnapCounter = 0;
                     if (semakAutoSnap(ctxV, geo)) {
                         isScanning = true; 
@@ -809,7 +810,7 @@
 
                         setTimeout(() => {
                             tangkapDanTanda(true);
-                        }, 250);
+                        }, 200);
                         return; 
                     }
                 }
@@ -878,35 +879,13 @@
             }
         }
 
+        // OPTIMASI: Logik Batal Pantas (Fast-Fail) & Ambang Dinamik (Dynamic Threshold)
         function semakAutoSnap(ctx, geo) {
-            let size = Math.max(8, geo.boxW * 0.02);
+            // Kecilkan sedikit saiz sampel piksel untuk jimat kitaran CPU (Pantas)
+            let size = Math.max(4, geo.boxW * 0.015);
             let half = size / 2;
             
-            let titikUjian = [
-                {x: geo.boxX - half, y: geo.boxY - half}, 
-                {x: geo.boxX + geo.boxW - half, y: geo.boxY - half}, 
-                {x: geo.boxX - half, y: geo.boxY + geo.boxH - half}, 
-                {x: geo.boxX + geo.boxW - half, y: geo.boxY + geo.boxH - half} 
-            ];
-
-            let jumlahGelap = 0;
-            
-            for (let pt of titikUjian) {
-                let sx = Math.max(0, Math.min(ctx.canvas.width - size, pt.x));
-                let sy = Math.max(0, Math.min(ctx.canvas.height - size, pt.y));
-                
-                let imgData = ctx.getImageData(sx, sy, size, size);
-                let pixels = imgData.data;
-                let sum = 0;
-                
-                for (let i = 0; i < pixels.length; i += 4) {
-                    sum += (0.299 * pixels[i] + 0.587 * pixels[i+1] + 0.114 * pixels[i+2]);
-                }
-                let avg = sum / (pixels.length / 4);
-                
-                if (avg < 90) jumlahGelap++; 
-            }
-
+            // 1. Semak Kecerahan Kertas (Center) DAHULU
             let cx = geo.boxX + geo.boxW/2;
             let cy = geo.boxY + geo.boxH/2;
             let sx = Math.max(0, Math.min(ctx.canvas.width - size, cx - half));
@@ -919,11 +898,46 @@
             }
             let cAvg = cSum / (cData.data.length / 4);
 
-            return (jumlahGelap === 4 && cAvg > 130);
+            // Jika bahagian tengah terlalu gelap (bukan kertas putih), terus batalkan (Pantas)
+            if (cAvg < 110) return false; 
+
+            // 2. Ambang Dinamik: Penjuru mesti jauh lebih gelap dari kertas putih (Ketepatan)
+            let darkThreshold = cAvg * 0.65; // Contoh: Kertas (200), Markah gelap mesti < 130
+            
+            let titikUjian = [
+                {x: geo.boxX - half, y: geo.boxY - half}, 
+                {x: geo.boxX + geo.boxW - half, y: geo.boxY - half}, 
+                {x: geo.boxX - half, y: geo.boxY + geo.boxH - half}, 
+                {x: geo.boxX + geo.boxW - half, y: geo.boxY + geo.boxH - half} 
+            ];
+
+            let jumlahGelap = 0;
+            for (let pt of titikUjian) {
+                let ptx = Math.max(0, Math.min(ctx.canvas.width - size, pt.x));
+                let pty = Math.max(0, Math.min(ctx.canvas.height - size, pt.y));
+                
+                let imgData = ctx.getImageData(ptx, pty, size, size);
+                let pixels = imgData.data;
+                let sum = 0;
+                
+                for (let i = 0; i < pixels.length; i += 4) {
+                    sum += (0.299 * pixels[i] + 0.587 * pixels[i+1] + 0.114 * pixels[i+2]);
+                }
+                let avg = sum / (pixels.length / 4);
+                
+                if (avg < darkThreshold) {
+                    jumlahGelap++; 
+                } else {
+                    // Logik Batal Pantas: Jika 1 penjuru gagal, tak perlu check yang lain
+                    return false;
+                }
+            }
+
+            return jumlahGelap === 4;
         }
 
         // ==========================================
-        // FUNGSI IMBAS DAN ANALISIS
+        // FUNGSI IMBAS DAN ANALISIS (DIOPTIMUMKAN)
         // ==========================================
         function tangkapDanTanda(dariAutoSnap = false) {
             if (skemaJawapan.includes(null)) {
@@ -967,6 +981,10 @@
             let markah = 0;
             let butiran = [];
             const r = geo.rowHeight * 0.40;
+            
+            // OPTIMASI KETEPATAN: Hanya imbas bahagian DALAM bulatan (50% dari saiz r)
+            // Ini mengelakkan algoritma membaca garisan tebal bulatan sebagai "gelap"
+            const scanR = r * 0.50; 
 
             for (let i = 0; i < JUMLAH_SOALAN; i++) {
                 let { cy, posX } = geo.getPilihanGeometri(i);
@@ -974,7 +992,8 @@
                 
                 for (let j = 0; j < PILIHAN.length; j++) {
                     let cx = posX[j];
-                    let imgData = ctx.getImageData(cx - r, cy - r, r*2, r*2);
+                    // Hanya potong bahagian teras dalam (scanR)
+                    let imgData = ctx.getImageData(cx - scanR, cy - scanR, scanR*2, scanR*2);
                     let pixels = imgData.data;
                     let totalBrightness = 0;
 
@@ -987,7 +1006,11 @@
                 }
 
                 let sortedBright = [...tahapKegelapan].sort((a,b) => a - b);
+                // purata kecerahan 3 pilihan yang kosong (kertas putih di bahagian dalam bulatan)
                 let avgPaper = (sortedBright[1] + sortedBright[2] + sortedBright[3]) / 3;
+                
+                // Memandangkan kita imbas bahagian dalam shj, kontras jawapan sebenar adalah lebih tajam. 
+                // Ambang 25 kekal berfungsi dengan lebih jitu.
                 let thresholdContrast = 25; 
                 let pilihanPelajar = null;
 
@@ -995,6 +1018,7 @@
                     let indeksJawapan = tahapKegelapan.indexOf(sortedBright[0]);
                     pilihanPelajar = PILIHAN[indeksJawapan];
                     
+                    // Semak jika ada lorekan berganda (Double mark)
                     if ((avgPaper - sortedBright[1]) > thresholdContrast) {
                         pilihanPelajar = "BATAL"; 
                     }
