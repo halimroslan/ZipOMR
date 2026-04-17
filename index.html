@@ -131,9 +131,18 @@
     <div class="max-w-2xl mx-auto px-4 mt-6 sm:mt-10 flex flex-col">
         
         <nav class="apple-segmented-control bg-[#e3e3e8] p-1 rounded-full flex mx-auto w-full sm:w-auto sm:min-w-[400px] mb-8 no-print shadow-inner">
-            <button onclick="tukarTab('skema')" id="nav-skema" class="flex-1 py-2 px-4 text-center font-medium text-sm rounded-full transition-all duration-300 bg-white text-apple-text shadow-sm">Skema</button>
-            <button onclick="tukarTab('cetak')" id="nav-cetak" class="flex-1 py-2 px-4 text-center font-medium text-sm rounded-full transition-all duration-300 text-apple-textMuted hover:text-apple-text">Cetak</button>
-            <button onclick="tukarTab('imbas')" id="nav-imbas" class="flex-1 py-2 px-4 text-center font-medium text-sm rounded-full transition-all duration-300 text-apple-textMuted hover:text-apple-text">Imbas</button>
+            <button onclick="tukarTab('skema')" id="nav-skema" class="flex-1 py-2 px-4 flex items-center justify-center gap-1.5 font-medium text-sm rounded-full transition-all duration-300 bg-white text-apple-text shadow-sm">
+                Skema
+                <span class="flex items-center justify-center w-[18px] h-[18px] text-[10px] font-bold text-white bg-apple-blue rounded-full shadow-sm">1</span>
+            </button>
+            <button onclick="tukarTab('cetak')" id="nav-cetak" class="flex-1 py-2 px-4 flex items-center justify-center gap-1.5 font-medium text-sm rounded-full transition-all duration-300 text-apple-textMuted hover:text-apple-text">
+                Cetak
+                <span class="flex items-center justify-center w-[18px] h-[18px] text-[10px] font-bold text-white bg-apple-blue rounded-full shadow-sm">2</span>
+            </button>
+            <button onclick="tukarTab('imbas')" id="nav-imbas" class="flex-1 py-2 px-4 flex items-center justify-center gap-1.5 font-medium text-sm rounded-full transition-all duration-300 text-apple-textMuted hover:text-apple-text">
+                Imbas
+                <span class="flex items-center justify-center w-[18px] h-[18px] text-[10px] font-bold text-white bg-apple-blue rounded-full shadow-sm">3</span>
+            </button>
         </nav>
 
         <main class="w-full">
@@ -278,6 +287,21 @@
         let isScanning = false;
         let autoSnapCounter = 0;
 
+        const LOGO_TEPI_HTML = `
+            <div class="absolute left-0 top-[25%] flex items-center justify-center gap-1 z-10" style="transform: translate(-50%, -50%) rotate(-90deg); transform-origin: center; white-space: nowrap;">
+                <svg class="w-[10px] h-[10px] sm:w-[12px] sm:h-[12px] text-black" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="6.5" y="5.5" width="11" height="13" rx="3.5" fill="currentColor" fill-opacity="0.2" />
+                    <path d="M8 4H6.5C5.11929 4 4 5.11929 4 6.5V8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M16 4H17.5C18.8807 4 20 5.11929 20 6.5V8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M8 20H6.5C5.11929 20 4 18.8807 4 17.5V16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M16 20H17.5C18.8807 20 20 18.8807 20 17.5V16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M2 12H22" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+                <span class="text-[11px] sm:text-[13px] font-bold tracking-tight text-black">CikguScan</span>
+                <span class="text-[5px] sm:text-[6px] font-medium bg-black text-white px-1 py-[1px] rounded-full">By Sir Halim</span>
+            </div>
+        `;
+
         // ==========================================
         // FUNGSI KEMAS KINI ORIENTASI HALAMAN
         // ==========================================
@@ -367,6 +391,8 @@
                 <div class="marker-corner absolute top-[50%] right-0 w-[14px] h-[14px] sm:w-[16px] sm:h-[16px] bg-black z-10" style="transform: translate(50%, -50%);"></div>
                 <div class="marker-corner absolute bottom-0 right-0 w-[14px] h-[14px] sm:w-[16px] sm:h-[16px] bg-black z-10" style="transform: translate(50%, 50%);"></div>
 
+                ${LOGO_TEPI_HTML}
+
                 <div class="absolute inset-0 flex flex-col p-[6%]">
                     ${headerHtml}
                     <div class="h-[5%]"></div>
@@ -448,6 +474,8 @@
                 <div class="marker-corner absolute top-0 right-0 w-[14px] h-[14px] sm:w-[16px] sm:h-[16px] bg-black z-10" style="transform: translate(50%, -50%);"></div>
                 <div class="marker-corner absolute top-[50%] right-0 w-[14px] h-[14px] sm:w-[16px] sm:h-[16px] bg-black z-10" style="transform: translate(50%, -50%);"></div>
                 <div class="marker-corner absolute bottom-0 right-0 w-[14px] h-[14px] sm:w-[16px] sm:h-[16px] bg-black z-10" style="transform: translate(50%, 50%);"></div>
+
+                ${LOGO_TEPI_HTML}
 
                 <div class="absolute inset-0 flex flex-col p-[6%]">
                     ${headerHtml}
@@ -532,6 +560,8 @@
                     <div class="marker-corner absolute top-0 right-0 w-[14px] h-[14px] sm:w-[16px] sm:h-[16px] bg-black z-10" style="transform: translate(50%, -50%);"></div>
                     <div class="marker-corner absolute top-[50%] right-0 w-[14px] h-[14px] sm:w-[16px] sm:h-[16px] bg-black z-10" style="transform: translate(50%, -50%);"></div>
                     <div class="marker-corner absolute bottom-0 right-0 w-[14px] h-[14px] sm:w-[16px] sm:h-[16px] bg-black z-10" style="transform: translate(50%, 50%);"></div>
+
+                    ${LOGO_TEPI_HTML}
 
                     <div class="absolute inset-0 flex flex-col p-[5%]">
                         ${headerHtml}
@@ -624,6 +654,8 @@
                 <div class="marker-corner absolute top-0 right-0 w-[14px] h-[14px] sm:w-[16px] sm:h-[16px] bg-black z-10" style="transform: translate(50%, -50%);"></div>
                 <div class="marker-corner absolute top-[50%] right-0 w-[14px] h-[14px] sm:w-[16px] sm:h-[16px] bg-black z-10" style="transform: translate(50%, -50%);"></div>
                 <div class="marker-corner absolute bottom-0 right-0 w-[14px] h-[14px] sm:w-[16px] sm:h-[16px] bg-black z-10" style="transform: translate(50%, 50%);"></div>
+
+                ${LOGO_TEPI_HTML}
 
                 <div class="absolute inset-0 flex flex-col p-[5%]">
                     ${headerHtml}
