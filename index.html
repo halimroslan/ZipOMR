@@ -351,10 +351,10 @@
 
             return `
             <div class="w-full flex box-border bg-white shrink-0" style="aspect-ratio: 100 / ${ratioVal};">
-                <div class="w-[20%] h-full flex items-center justify-end pr-2 sm:pr-3 font-bold border-r-[2px] border-black text-xs sm:text-base" style="font-family: 'Inter', sans-serif;">
+                <div class="w-[16%] h-full flex items-center justify-end pr-1 sm:pr-2 font-bold border-r-[2px] border-black text-xs sm:text-base" style="font-family: 'Inter', sans-serif;">
                     ${index + 1}.
                 </div>
-                <div class="w-[80%] h-full flex items-center">
+                <div class="w-[84%] h-full flex items-center">
                     ${htmlBulatan}
                 </div>
             </div>`;
@@ -500,7 +500,7 @@
             
             let isTwoCols = JUMLAH_SOALAN > 30;
             let numRows = isTwoCols ? 20 : JUMLAH_SOALAN;
-            let ratio = numRows <= 15 ? 12 : 8.5; 
+            let ratio = numRows <= 15 ? 12 : 9.5; 
 
             let availableHeight = 800; 
             let actualRatio = ratio / 100;
@@ -549,8 +549,10 @@
                 
                 <div class="w-full relative border-[2px] sm:border-[3px] border-black mx-auto mt-4" style="max-width: ${safeMaxWidth}px;">
                     <div class="marker-corner absolute top-0 left-0 w-4 h-4 sm:w-5 sm:h-5 bg-black z-10" style="transform: translate(-50%, -50%);"></div>
-                    <div class="marker-corner absolute top-0 right-0 w-4 h-4 sm:w-5 sm:h-5 bg-black z-10" style="transform: translate(50%, -50%);"></div>
+                    <div class="marker-corner absolute top-[50%] left-0 w-4 h-4 sm:w-5 sm:h-5 bg-black z-10" style="transform: translate(-50%, -50%);"></div>
                     <div class="marker-corner absolute bottom-0 left-0 w-4 h-4 sm:w-5 sm:h-5 bg-black z-10" style="transform: translate(-50%, 50%);"></div>
+                    <div class="marker-corner absolute top-0 right-0 w-4 h-4 sm:w-5 sm:h-5 bg-black z-10" style="transform: translate(50%, -50%);"></div>
+                    <div class="marker-corner absolute top-[50%] right-0 w-4 h-4 sm:w-5 sm:h-5 bg-black z-10" style="transform: translate(50%, -50%);"></div>
                     <div class="marker-corner absolute bottom-0 right-0 w-4 h-4 sm:w-5 sm:h-5 bg-black z-10" style="transform: translate(50%, 50%);"></div>
                     ${soalanHtml}
                 </div>
@@ -608,7 +610,7 @@
 
             let isTwoCols = JUMLAH_SOALAN > 30;
             let numRows = isTwoCols ? 20 : JUMLAH_SOALAN;
-            let ratio = numRows <= 15 ? 12 : 8.5;
+            let ratio = numRows <= 15 ? 12 : 9.5;
 
             // Ketinggian selamat disesuaikan supaya bingkai tak langgar margin A4
             let availableHeight = 520; 
@@ -663,8 +665,10 @@
                     
                     <div class="w-full relative border-[2px] sm:border-[3px] border-black mx-auto" style="max-width: ${safeMaxWidth}px;">
                         <div class="marker-corner absolute top-0 left-0 w-4 h-4 sm:w-5 sm:h-5 bg-black z-10" style="transform: translate(-50%, -50%);"></div>
-                        <div class="marker-corner absolute top-0 right-0 w-4 h-4 sm:w-5 sm:h-5 bg-black z-10" style="transform: translate(50%, -50%);"></div>
+                        <div class="marker-corner absolute top-[50%] left-0 w-4 h-4 sm:w-5 sm:h-5 bg-black z-10" style="transform: translate(-50%, -50%);"></div>
                         <div class="marker-corner absolute bottom-0 left-0 w-4 h-4 sm:w-5 sm:h-5 bg-black z-10" style="transform: translate(-50%, 50%);"></div>
+                        <div class="marker-corner absolute top-0 right-0 w-4 h-4 sm:w-5 sm:h-5 bg-black z-10" style="transform: translate(50%, -50%);"></div>
+                        <div class="marker-corner absolute top-[50%] right-0 w-4 h-4 sm:w-5 sm:h-5 bg-black z-10" style="transform: translate(50%, -50%);"></div>
                         <div class="marker-corner absolute bottom-0 right-0 w-4 h-4 sm:w-5 sm:h-5 bg-black z-10" style="transform: translate(50%, 50%);"></div>
                         ${soalanHtml}
                     </div>
@@ -682,7 +686,7 @@
             let numRows = isTwoCols ? 20 : JUMLAH_SOALAN;
             let colW = isTwoCols ? (boxW / 2) : boxW;
             
-            let ratio = numRows <= 15 ? 0.12 : (numRows <= 30 ? 0.085 : 0.075);
+            let ratio = numRows <= 15 ? 0.12 : 0.095;
             let rowHeight = colW * ratio; 
             let boxH = rowHeight * numRows;
 
@@ -704,10 +708,10 @@
                 let cY = boxY + (row * rowHeight) + (rowHeight / 2);
 
                 let posX = [
-                    cX + colW * 0.30, 
-                    cX + colW * 0.50, 
-                    cX + colW * 0.70, 
-                    cX + colW * 0.90  
+                    cX + colW * 0.265, 
+                    cX + colW * 0.475, 
+                    cX + colW * 0.685, 
+                    cX + colW * 0.895  
                 ];
 
                 return { cy: cY, posX: posX };
@@ -833,7 +837,7 @@
             ctx.lineWidth = 1;
             ctx.strokeRect(geo.boxX, geo.boxY, geo.boxW, geo.boxH);
 
-            // 4 Kotak Biru Sasaran (Target Boxes untuk titik reference)
+            // 6 Kotak Biru Sasaran (Target Boxes untuk titik reference)
             let ts = Math.max(30, geo.boxW * 0.08); // Saiz kotak sasaran
             let halfTs = ts / 2;
             
@@ -845,13 +849,21 @@
             ctx.fillRect(geo.boxX - halfTs, geo.boxY - halfTs, ts, ts);
             ctx.strokeRect(geo.boxX - halfTs, geo.boxY - halfTs, ts, ts);
             
-            // TR (Top Right)
-            ctx.fillRect(geo.boxX + geo.boxW - halfTs, geo.boxY - halfTs, ts, ts);
-            ctx.strokeRect(geo.boxX + geo.boxW - halfTs, geo.boxY - halfTs, ts, ts);
+            // CL (Center Left)
+            ctx.fillRect(geo.boxX - halfTs, geo.boxY + (geo.boxH / 2) - halfTs, ts, ts);
+            ctx.strokeRect(geo.boxX - halfTs, geo.boxY + (geo.boxH / 2) - halfTs, ts, ts);
             
             // BL (Bottom Left)
             ctx.fillRect(geo.boxX - halfTs, geo.boxY + geo.boxH - halfTs, ts, ts);
             ctx.strokeRect(geo.boxX - halfTs, geo.boxY + geo.boxH - halfTs, ts, ts);
+            
+            // TR (Top Right)
+            ctx.fillRect(geo.boxX + geo.boxW - halfTs, geo.boxY - halfTs, ts, ts);
+            ctx.strokeRect(geo.boxX + geo.boxW - halfTs, geo.boxY - halfTs, ts, ts);
+            
+            // CR (Center Right)
+            ctx.fillRect(geo.boxX + geo.boxW - halfTs, geo.boxY + (geo.boxH / 2) - halfTs, ts, ts);
+            ctx.strokeRect(geo.boxX + geo.boxW - halfTs, geo.boxY + (geo.boxH / 2) - halfTs, ts, ts);
             
             // BR (Bottom Right)
             ctx.fillRect(geo.boxX + geo.boxW - halfTs, geo.boxY + geo.boxH - halfTs, ts, ts);
@@ -905,10 +917,12 @@
             let darkThreshold = cAvg * 0.65; // Contoh: Kertas (200), Markah gelap mesti < 130
             
             let titikUjian = [
-                {x: geo.boxX - half, y: geo.boxY - half}, 
-                {x: geo.boxX + geo.boxW - half, y: geo.boxY - half}, 
-                {x: geo.boxX - half, y: geo.boxY + geo.boxH - half}, 
-                {x: geo.boxX + geo.boxW - half, y: geo.boxY + geo.boxH - half} 
+                {x: geo.boxX - half, y: geo.boxY - half}, // TL
+                {x: geo.boxX + geo.boxW - half, y: geo.boxY - half}, // TR
+                {x: geo.boxX - half, y: geo.boxY + geo.boxH/2 - half}, // CL
+                {x: geo.boxX + geo.boxW - half, y: geo.boxY + geo.boxH/2 - half}, // CR
+                {x: geo.boxX - half, y: geo.boxY + geo.boxH - half}, // BL
+                {x: geo.boxX + geo.boxW - half, y: geo.boxY + geo.boxH - half} // BR
             ];
 
             let jumlahGelap = 0;
@@ -933,7 +947,7 @@
                 }
             }
 
-            return jumlahGelap === 4;
+            return jumlahGelap === 6;
         }
 
         // ==========================================
