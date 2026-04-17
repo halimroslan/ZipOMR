@@ -325,6 +325,40 @@
             </div>
         `;
 
+        // Fungsi helper untuk jana HTML baris soalan
+        function binaBarisSoalan(index, ratioVal, skemaJawapanList = null) {
+            if (index >= JUMLAH_SOALAN) {
+                return `<div class="w-full flex box-border bg-white" style="aspect-ratio: 100 / ${ratioVal};"></div>`;
+            }
+
+            let htmlBulatan = PILIHAN.map(p => {
+                let fillCircle = "white";
+                let fillText = "#4B5563";
+                if (skemaJawapanList) {
+                    let isJawapan = (skemaJawapanList[index] === p);
+                    fillCircle = isJawapan ? "black" : "white";
+                    fillText = isJawapan ? "white" : "#4B5563";
+                }
+                return `
+                <div class="flex-1 h-full flex items-center justify-center">
+                    <svg viewBox="0 0 100 100" style="height: 90%; aspect-ratio: 1/1;">
+                        <circle cx="50" cy="50" r="46" stroke="black" stroke-width="4" fill="${fillCircle}" />
+                        <text x="50" y="50" dy=".35em" text-anchor="middle" font-size="52" font-family="'Inter', sans-serif" font-weight="bold" fill="${fillText}">${p}</text>
+                    </svg>
+                </div>`;
+            }).join('');
+
+            return `
+            <div class="w-full flex box-border bg-white" style="aspect-ratio: 100 / ${ratioVal};">
+                <div class="w-[20%] h-full flex items-center justify-end pr-2 sm:pr-3 font-bold border-r-[2px] border-black text-xs sm:text-base" style="font-family: 'Inter', sans-serif;">
+                    ${index + 1}.
+                </div>
+                <div class="w-[80%] h-full flex items-center">
+                    ${htmlBulatan}
+                </div>
+            </div>`;
+        }
+
         function kemaskiniJumlahSoalan() {
             let inputEl = document.getElementById('input-jumlah-soalan');
             let nilai = parseInt(inputEl.value);
@@ -463,42 +497,43 @@
             
             styleTag.innerHTML = "@media print { @page { size: A4 portrait; margin: 10mm; } }";
             
-            let ratio = JUMLAH_SOALAN <= 15 ? 12 : (JUMLAH_SOALAN <= 30 ? 8.5 : 7.5);
+            let isTwoCols = JUMLAH_SOALAN > 30;
+            let numRows = isTwoCols ? 20 : JUMLAH_SOALAN;
+            let ratio = numRows <= 15 ? 12 : 8.5; 
+
             let availableHeight = 800; 
             let actualRatio = ratio / 100;
-            let safeMaxWidth = Math.floor(availableHeight / (JUMLAH_SOALAN * actualRatio));
-            safeMaxWidth = Math.min(450, safeMaxWidth); 
+            let heightPerColWidth = numRows * actualRatio;
+            
+            let safeMaxWidth;
+            if (isTwoCols) {
+                safeMaxWidth = Math.floor(availableHeight / (heightPerColWidth / 2));
+                safeMaxWidth = Math.min(650, safeMaxWidth); 
+            } else {
+                safeMaxWidth = Math.floor(availableHeight / heightPerColWidth);
+                safeMaxWidth = Math.min(450, safeMaxWidth); 
+            }
 
             let divSet = document.createElement('div');
             divSet.className = "bg-white flex flex-col justify-start print:p-0 overflow-hidden mx-auto break-inside-avoid print:break-inside-avoid";
             divSet.style.fontFamily = "'Inter', sans-serif";
             
             let soalanHtml = '';
-            for (let i = 0; i < JUMLAH_SOALAN; i++) {
-                let htmlBulatan = PILIHAN.map(p => {
-                    let isJawapan = (skemaJawapan[i] === p);
-                    let fillCircle = isJawapan ? "black" : "white";
-                    let fillText = isJawapan ? "white" : "#4B5563";
-                    
-                    return `
-                    <div class="flex-1 h-full flex items-center justify-center">
-                        <svg viewBox="0 0 100 100" style="height: 90%; aspect-ratio: 1/1;">
-                            <circle cx="50" cy="50" r="46" stroke="black" stroke-width="4" fill="${fillCircle}" />
-                            <text x="50" y="50" dy=".35em" text-anchor="middle" font-size="52" font-family="'Inter', sans-serif" font-weight="bold" fill="${fillText}">${p}</text>
-                        </svg>
-                    </div>
-                `}).join('');
-
-                soalanHtml += `
-                    <div class="w-full flex box-border bg-white" style="aspect-ratio: 100 / ${ratio};">
-                        <div class="w-[20%] h-full flex items-center justify-end pr-2 sm:pr-3 font-bold border-r-[2px] border-black text-xs sm:text-base" style="font-family: 'Inter', sans-serif;">
-                            ${i + 1}.
-                        </div>
-                        <div class="w-[80%] h-full flex items-center">
-                            ${htmlBulatan}
-                        </div>
+            if (isTwoCols) {
+                let col1 = '', col2 = '';
+                for (let i = 0; i < 20; i++) col1 += binaBarisSoalan(i, ratio, skemaJawapan);
+                for (let i = 20; i < 40; i++) col2 += binaBarisSoalan(i, ratio, skemaJawapan);
+                
+                soalanHtml = `
+                    <div class="flex w-full">
+                        <div class="w-1/2 border-r-[2px] border-black flex flex-col">${col1}</div>
+                        <div class="w-1/2 flex flex-col">${col2}</div>
                     </div>
                 `;
+            } else {
+                for (let i = 0; i < JUMLAH_SOALAN; i++) {
+                    soalanHtml += binaBarisSoalan(i, ratio, skemaJawapan);
+                }
             }
 
             divSet.innerHTML = `
@@ -568,16 +603,25 @@
                 bekas.style.gridTemplateRows = "1fr";
             }
 
-            let ratio = JUMLAH_SOALAN <= 15 ? 12 : (JUMLAH_SOALAN <= 30 ? 8.5 : 7.5);
+            let isTwoCols = JUMLAH_SOALAN > 30;
+            let numRows = isTwoCols ? 20 : JUMLAH_SOALAN;
+            let ratio = numRows <= 15 ? 12 : 8.5;
+
             let availableHeight = 520; 
             if (sets === 6) availableHeight = 280;
             if (sets === 2) availableHeight = 780; 
 
             let actualRatio = ratio / 100;
-            let safeMaxWidth = Math.floor(availableHeight / (JUMLAH_SOALAN * actualRatio));
+            let heightPerColWidth = numRows * actualRatio;
+            let safeMaxWidth;
             
-            if (sets === 2) safeMaxWidth = Math.min(320, safeMaxWidth);
-            else safeMaxWidth = Math.min(280, safeMaxWidth);
+            if (isTwoCols) {
+                safeMaxWidth = Math.floor(availableHeight / (heightPerColWidth / 2));
+                safeMaxWidth = Math.min(320, safeMaxWidth); // Fit on portrait 2 cols
+            } else {
+                safeMaxWidth = Math.floor(availableHeight / heightPerColWidth);
+                safeMaxWidth = Math.min(280, safeMaxWidth);
+            }
 
             for (let s = 0; s < sets; s++) {
                 let divSet = document.createElement('div');
@@ -585,26 +629,21 @@
                 divSet.style.fontFamily = "'Inter', sans-serif";
                 
                 let soalanHtml = '';
-                for (let i = 0; i < JUMLAH_SOALAN; i++) {
-                    let htmlBulatan = PILIHAN.map(p => `
-                        <div class="flex-1 h-full flex items-center justify-center">
-                            <svg viewBox="0 0 100 100" style="height: 90%; aspect-ratio: 1/1;">
-                                <circle cx="50" cy="50" r="46" stroke="black" stroke-width="4" fill="white" />
-                                <text x="50" y="50" dy=".35em" text-anchor="middle" font-size="52" font-family="'Inter', sans-serif" font-weight="bold" fill="#4B5563">${p}</text>
-                            </svg>
-                        </div>
-                    `).join('');
-
-                    soalanHtml += `
-                        <div class="w-full flex box-border bg-white" style="aspect-ratio: 100 / ${ratio};">
-                            <div class="w-[20%] h-full flex items-center justify-end pr-2 sm:pr-3 font-bold border-r-[2px] border-black text-xs sm:text-base" style="font-family: 'Inter', sans-serif;">
-                                ${i + 1}.
-                            </div>
-                            <div class="w-[80%] h-full flex items-center">
-                                ${htmlBulatan}
-                            </div>
+                if (isTwoCols) {
+                    let col1 = '', col2 = '';
+                    for (let i = 0; i < 20; i++) col1 += binaBarisSoalan(i, ratio, null);
+                    for (let i = 20; i < 40; i++) col2 += binaBarisSoalan(i, ratio, null);
+                    
+                    soalanHtml = `
+                        <div class="flex w-full">
+                            <div class="w-1/2 border-r-[2px] border-black flex flex-col">${col1}</div>
+                            <div class="w-1/2 flex flex-col">${col2}</div>
                         </div>
                     `;
+                } else {
+                    for (let i = 0; i < JUMLAH_SOALAN; i++) {
+                        soalanHtml += binaBarisSoalan(i, ratio, null);
+                    }
                 }
 
                 divSet.innerHTML = `
@@ -633,28 +672,42 @@
         // ==========================================
         function dapatkanGeometriOMR(cw, ch) {
             let boxW = cw * 0.80; 
+            let isTwoCols = JUMLAH_SOALAN > 30;
+            let numRows = isTwoCols ? 20 : JUMLAH_SOALAN;
+            let colW = isTwoCols ? (boxW / 2) : boxW;
             
-            let ratio = JUMLAH_SOALAN <= 15 ? 0.12 : (JUMLAH_SOALAN <= 30 ? 0.085 : 0.075);
-            let rowHeight = boxW * ratio; 
-            let boxH = rowHeight * JUMLAH_SOALAN;
+            let ratio = numRows <= 15 ? 0.12 : (numRows <= 30 ? 0.085 : 0.075);
+            let rowHeight = colW * ratio; 
+            let boxH = rowHeight * numRows;
 
             if (boxH > ch * 0.80) {
                 boxH = ch * 0.80;
-                rowHeight = boxH / JUMLAH_SOALAN;
-                boxW = rowHeight / ratio;
+                rowHeight = boxH / numRows;
+                colW = rowHeight / ratio;
+                boxW = isTwoCols ? (colW * 2) : colW;
             }
 
             const boxX = (cw - boxW) / 2;
             const boxY = (ch - boxH) / 2;
 
-            const posXPilihan = [
-                boxX + boxW * 0.30, // A 
-                boxX + boxW * 0.50, // B
-                boxX + boxW * 0.70, // C
-                boxX + boxW * 0.90  // D
-            ];
+            function getPilihanGeometri(soalanIndex) {
+                let col = isTwoCols && soalanIndex >= 20 ? 1 : 0;
+                let row = isTwoCols && soalanIndex >= 20 ? soalanIndex - 20 : soalanIndex;
 
-            return { boxX, boxY, boxW, boxH, rowHeight, posXPilihan };
+                let cX = boxX + (col * colW);
+                let cY = boxY + (row * rowHeight) + (rowHeight / 2);
+
+                let posX = [
+                    cX + colW * 0.30, 
+                    cX + colW * 0.50, 
+                    cX + colW * 0.70, 
+                    cX + colW * 0.90  
+                ];
+
+                return { cy: cY, posX: posX };
+            }
+
+            return { boxX, boxY, boxW, boxH, rowHeight, colW, isTwoCols, getPilihanGeometri };
         }
 
         // ==========================================
@@ -799,14 +852,23 @@
 
             const r = geo.rowHeight * 0.40; 
             for (let i = 0; i < JUMLAH_SOALAN; i++) {
-                let cy = geo.boxY + (i * geo.rowHeight) + (geo.rowHeight / 2);
+                let { cy, posX } = geo.getPilihanGeometri(i);
                 for (let j = 0; j < 4; j++) {
-                    let cx = geo.posXPilihan[j];
                     ctx.beginPath();
-                    ctx.arc(cx, cy, r, 0, 2*Math.PI);
+                    ctx.arc(posX[j], cy, r, 0, 2*Math.PI);
                     ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
                     ctx.stroke();
                 }
+            }
+            
+            // Draw center divider if 2 cols
+            if (geo.isTwoCols) {
+                ctx.beginPath();
+                ctx.moveTo(geo.boxX + geo.colW, geo.boxY);
+                ctx.lineTo(geo.boxX + geo.colW, geo.boxY + geo.boxH);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
             }
         }
 
@@ -876,28 +938,28 @@
             const ctx = sumberCanvas.getContext('2d', { willReadFrequently: true });
             const cw = sumberCanvas.width;
             const ch = sumberCanvas.height;
-            const geo = dapatkanGeometriOMR(cw, ch);
-
-            const canvasDebug = document.getElementById('canvas-debug');
-            canvasDebug.width = cw;
-            canvasDebug.height = ch;
-            const ctxDebug = canvasDebug.getContext('2d');
-            ctxDebug.drawImage(sumberCanvas, 0, 0);
-
+            // Tunjuk kotak sempadan di keputusan
             ctxDebug.strokeStyle = "rgba(0, 113, 227, 0.4)";
             ctxDebug.lineWidth = 3;
             ctxDebug.strokeRect(geo.boxX, geo.boxY, geo.boxW, geo.boxH);
+            
+            if (geo.isTwoCols) {
+                ctxDebug.beginPath();
+                ctxDebug.moveTo(geo.boxX + geo.colW, geo.boxY);
+                ctxDebug.lineTo(geo.boxX + geo.colW, geo.boxY + geo.boxH);
+                ctxDebug.stroke();
+            }
 
             let markah = 0;
             let butiran = [];
             const r = geo.rowHeight * 0.40;
 
             for (let i = 0; i < JUMLAH_SOALAN; i++) {
-                let cy = geo.boxY + (i * geo.rowHeight) + (geo.rowHeight / 2);
+                let { cy, posX } = geo.getPilihanGeometri(i);
                 let tahapKegelapan = [];
                 
                 for (let j = 0; j < PILIHAN.length; j++) {
-                    let cx = geo.posXPilihan[j];
+                    let cx = posX[j];
                     let imgData = ctx.getImageData(cx - r, cy - r, r*2, r*2);
                     let pixels = imgData.data;
                     let totalBrightness = 0;
@@ -925,7 +987,7 @@
                 }
 
                 for (let j = 0; j < PILIHAN.length; j++) {
-                    let cx = geo.posXPilihan[j];
+                    let cx = posX[j];
                     ctxDebug.beginPath();
                     ctxDebug.arc(cx, cy, r, 0, 2 * Math.PI); 
                     
