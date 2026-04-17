@@ -600,7 +600,7 @@
             } else {
                 styleTag.innerHTML = "@media print { @page { size: A4 portrait; margin: 10mm; } }";
                 labelOrientasi.innerText = "A4 Portrait";
-                bekas.className = "grid grid-cols-1 gap-6 print:gap-8 w-full";
+                bekas.className = "grid grid-cols-1 gap-4 print:gap-6 w-full";
                 // Ketinggian dibiar membesar auto elak elemen dihimpit (squished)
                 bekas.style.height = "auto"; 
                 bekas.style.gridTemplateRows = "auto auto";
@@ -613,7 +613,7 @@
             // Ketinggian selamat disesuaikan supaya bingkai tak langgar margin A4
             let availableHeight = 520; 
             if (sets === 6) availableHeight = 280;
-            if (sets === 2) availableHeight = 450; 
+            if (sets === 2) availableHeight = 410; // Dikurangkan dari 460 ke 410 supaya muat dlm 1 muka surat A4
 
             let actualRatio = ratio / 100;
             let heightPerColWidth = numRows * actualRatio;
@@ -621,8 +621,8 @@
             
             if (isTwoCols) {
                 safeMaxWidth = Math.floor(availableHeight / (heightPerColWidth / 2));
-                // Had maksimum 540 cukup besar tanpa melanggar grid cetakan
-                safeMaxWidth = Math.min(540, safeMaxWidth); 
+                // Had maksimum dikecilkan sedikit untuk elak tinggi melebih A4
+                safeMaxWidth = Math.min(520, safeMaxWidth); 
             } else {
                 safeMaxWidth = Math.floor(availableHeight / heightPerColWidth);
                 safeMaxWidth = Math.min(280, safeMaxWidth);
