@@ -224,7 +224,7 @@
             <div id="tab-imbas" class="tab-content hidden flex-col">
                 <div class="text-center mb-6 no-print">
                     <h2 class="text-3xl sm:text-4xl font-bold tracking-tight mb-2">Imbas Kertas.</h2>
-                    <p class="text-apple-textMuted font-medium text-sm px-4">Halakan kamera pada 6 titik hitam di bingkai kertas. <br class="hidden sm:block">Sistem akan menangkap gambar secara automatik.</p>
+                    <p class="text-apple-textMuted font-medium text-sm px-4">Halakan kamera pada 4 titik hitam di bucu kertas. <br class="hidden sm:block">Sistem akan menangkap gambar secara automatik.</p>
                 </div>
                 
                 <div class="apple-card relative w-full h-[60vh] min-h-[400px] bg-black rounded-[32px] overflow-hidden flex items-center justify-center shadow-apple border-4 border-white/50">
@@ -342,7 +342,7 @@
                 }
                 return `
                 <div class="flex-1 h-full flex items-center justify-center">
-                    <svg viewBox="0 0 100 100" style="height: 80%; aspect-ratio: 1/1;">
+                    <svg viewBox="0 0 100 100" style="height: 90%; aspect-ratio: 1/1;">
                         <circle cx="50" cy="50" r="46" stroke="black" stroke-width="4" fill="${fillCircle}" />
                         <text x="50" y="50" dy=".35em" text-anchor="middle" font-size="52" font-family="'Inter', sans-serif" font-weight="bold" fill="${fillText}">${p}</text>
                     </svg>
@@ -351,10 +351,10 @@
 
             return `
             <div class="w-full flex box-border bg-white shrink-0" style="aspect-ratio: 100 / ${ratioVal};">
-                <div class="w-[12%] h-full flex items-center justify-end pr-1 sm:pr-2 font-bold border-r-[2px] border-black text-[10px] sm:text-base" style="font-family: 'Inter', sans-serif;">
+                <div class="w-[16%] h-full flex items-center justify-end pr-1 sm:pr-2 font-bold border-r-[2px] border-black text-xs sm:text-base" style="font-family: 'Inter', sans-serif;">
                     ${index + 1}.
                 </div>
-                <div class="w-[88%] h-full flex items-center">
+                <div class="w-[84%] h-full flex items-center">
                     ${htmlBulatan}
                 </div>
             </div>`;
@@ -496,28 +496,56 @@
                 document.head.appendChild(styleTag);
             }
             
-            styleTag.innerHTML = "@media print { @page { size: A4 portrait; margin: 10mm; } }";
-            
+            let sets = 3;
+            if (JUMLAH_SOALAN <= 5) sets = 6;
+            else if (JUMLAH_SOALAN <= 15) sets = 4;
+            else if (JUMLAH_SOALAN <= 30) sets = 3;
+            else sets = 2; 
+
+            if (sets === 6) {
+                styleTag.innerHTML = "@media print { @page { size: A4 landscape; margin: 10mm; } }";
+                bekas.className = "grid grid-cols-3 gap-4 print:gap-x-6 print:gap-y-6 w-full";
+                bekas.style.height = "18cm";
+                bekas.style.gridTemplateRows = "1fr 1fr";
+            } else if (sets === 4) {
+                styleTag.innerHTML = "@media print { @page { size: A4 landscape; margin: 10mm; } }";
+                bekas.className = "grid grid-cols-4 gap-4 print:gap-4 w-full";
+                bekas.style.height = "18cm";
+                bekas.style.gridTemplateRows = "1fr";
+            } else if (sets === 3) {
+                styleTag.innerHTML = "@media print { @page { size: A4 landscape; margin: 10mm; } }";
+                bekas.className = "grid grid-cols-3 gap-4 print:gap-6 w-full";
+                bekas.style.height = "18cm";
+                bekas.style.gridTemplateRows = "1fr";
+            } else {
+                styleTag.innerHTML = "@media print { @page { size: A4 portrait; margin: 10mm; } }";
+                bekas.className = "grid grid-cols-1 gap-4 print:gap-6 w-full";
+                bekas.style.height = "auto"; 
+                bekas.style.gridTemplateRows = "auto auto";
+            }
+
             let isTwoCols = JUMLAH_SOALAN > 30;
             let numRows = isTwoCols ? 20 : JUMLAH_SOALAN;
-            let ratio = numRows <= 15 ? 12 : 9.5; 
+            let ratio = numRows <= 15 ? 12 : 9.5;
 
-            let availableHeight = 800; 
+            let availableHeight = 520; 
+            if (sets === 6) availableHeight = 280;
+            if (sets === 2) availableHeight = 410; 
+
             let actualRatio = ratio / 100;
             let heightPerColWidth = numRows * actualRatio;
-            
             let safeMaxWidth;
+            
             if (isTwoCols) {
                 safeMaxWidth = Math.floor(availableHeight / (heightPerColWidth / 2));
-                safeMaxWidth = Math.min(650, safeMaxWidth); // Supaya ngam dengan A4 
+                safeMaxWidth = Math.min(520, safeMaxWidth); 
             } else {
                 safeMaxWidth = Math.floor(availableHeight / heightPerColWidth);
-                safeMaxWidth = Math.min(450, safeMaxWidth); 
+                safeMaxWidth = Math.min(280, safeMaxWidth);
             }
 
             let divSet = document.createElement('div');
-            // overflow-hidden dibuang untuk elak sebarang elemen terpotong
-            divSet.className = "bg-white flex flex-col justify-start print:p-0 mx-auto break-inside-avoid print:break-inside-avoid";
+            divSet.className = "bg-white flex flex-col justify-start border border-gray-300 print:border-none p-2 print:p-0 break-inside-avoid print:break-inside-avoid";
             divSet.style.fontFamily = "'Inter', sans-serif";
             
             let soalanHtml = '';
@@ -539,15 +567,15 @@
             }
 
             divSet.innerHTML = `
-                <div class="w-full flex flex-col items-center pb-1 mb-1 shrink-0">
+                <div class="w-full flex flex-col items-center shrink-0 mb-1.5">
                     ${LOGO_PRINT_HTML}
-                    <div class="text-[9px] font-bold uppercase tracking-widest border-b border-black inline-block pb-0.5 mt-0.5">SKEMA JAWAPAN</div>
-                    <div class="flex justify-center mt-1 text-[7px] font-bold px-1 text-gray-700">
-                        *Sila imbas menggunakan kamera untuk penskoran automatik.*
+                    <div class="flex w-full mt-0.5 text-[9px] font-bold mx-auto" style="max-width: ${safeMaxWidth}px; font-family: 'Inter', sans-serif;">
+                        <div class="w-[72%] text-left overflow-hidden whitespace-nowrap text-clip">NAMA: SKEMA JAWAPAN___________________________________________________________</div>
+                        <div class="w-[28%] text-left overflow-hidden whitespace-nowrap text-clip pl-1.5">KELAS: _________</div>
                     </div>
                 </div>
                 
-                <div class="w-full relative border-[2px] sm:border-[3px] border-black mx-auto mt-4" style="max-width: ${safeMaxWidth}px;">
+                <div class="w-full relative border-[2px] sm:border-[3px] border-black mx-auto" style="max-width: ${safeMaxWidth}px;">
                     <div class="marker-corner absolute top-0 left-0 w-4 h-4 sm:w-5 sm:h-5 bg-black z-10" style="transform: translate(-50%, -50%);"></div>
                     <div class="marker-corner absolute top-[50%] left-0 w-4 h-4 sm:w-5 sm:h-5 bg-black z-10" style="transform: translate(-50%, -50%);"></div>
                     <div class="marker-corner absolute bottom-0 left-0 w-4 h-4 sm:w-5 sm:h-5 bg-black z-10" style="transform: translate(-50%, 50%);"></div>
@@ -612,10 +640,10 @@
             let numRows = isTwoCols ? 20 : JUMLAH_SOALAN;
             let ratio = numRows <= 15 ? 12 : 9.5;
 
-            // Ketinggian selamat disesuaikan supaya bingkai tak langgar margin A4 (mengelakkan bleeding ke page 2)
+            // Ketinggian selamat disesuaikan supaya bingkai tak langgar margin A4
             let availableHeight = 520; 
             if (sets === 6) availableHeight = 280;
-            if (sets === 2) availableHeight = 380; // Dikurangkan supaya muat dlm 1 muka surat A4 tanpa terpotong
+            if (sets === 2) availableHeight = 410; // Dikurangkan dari 460 ke 410 supaya muat dlm 1 muka surat A4
 
             let actualRatio = ratio / 100;
             let heightPerColWidth = numRows * actualRatio;
@@ -623,6 +651,7 @@
             
             if (isTwoCols) {
                 safeMaxWidth = Math.floor(availableHeight / (heightPerColWidth / 2));
+                // Had maksimum dikecilkan sedikit untuk elak tinggi melebih A4
                 safeMaxWidth = Math.min(520, safeMaxWidth); 
             } else {
                 safeMaxWidth = Math.floor(availableHeight / heightPerColWidth);
@@ -706,12 +735,11 @@
                 let cX = boxX + (col * colW);
                 let cY = boxY + (row * rowHeight) + (rowHeight / 2);
 
-                // Kedudukan koordinat XY bulatan diperluaskan supaya imbasan tepat dan selari
                 let posX = [
-                    cX + colW * 0.23, 
-                    cX + colW * 0.45, 
-                    cX + colW * 0.67, 
-                    cX + colW * 0.89  
+                    cX + colW * 0.265, 
+                    cX + colW * 0.475, 
+                    cX + colW * 0.685, 
+                    cX + colW * 0.895  
                 ];
 
                 return { cy: cY, posX: posX };
@@ -916,7 +944,6 @@
             // 2. Ambang Dinamik: Penjuru mesti jauh lebih gelap dari kertas putih (Ketepatan)
             let darkThreshold = cAvg * 0.65; // Contoh: Kertas (200), Markah gelap mesti < 130
             
-            // 6 titik ujian untuk ketepatan maksimum
             let titikUjian = [
                 {x: geo.boxX - half, y: geo.boxY - half}, // TL
                 {x: geo.boxX + geo.boxW - half, y: geo.boxY - half}, // TR
@@ -995,7 +1022,7 @@
 
             let markah = 0;
             let butiran = [];
-            const r = geo.rowHeight * 0.35; // Dikurangkan berpadanan dengan rekaan SVG 80%
+            const r = geo.rowHeight * 0.40;
             
             // OPTIMASI KETEPATAN: Hanya imbas bahagian DALAM bulatan (50% dari saiz r)
             // Ini mengelakkan algoritma membaca garisan tebal bulatan sebagai "gelap"
