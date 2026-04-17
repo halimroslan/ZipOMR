@@ -1180,24 +1180,31 @@
         }
 
         function semakAutoSnap(ctx, geo) {
-            let size = Math.max(4, geo.boxW * 0.015);
+            let size = Math.max(12, geo.boxW * 0.04);
             let half = size / 2;
             
-            let cx = geo.boxX + geo.boxW/2;
-            let cy = geo.boxY + geo.boxH/2;
-            let sx = Math.max(0, Math.min(ctx.canvas.width - size, cx - half));
-            let sy = Math.max(0, Math.min(ctx.canvas.height - size, cy - half));
-            
-            let cData = ctx.getImageData(sx, sy, size, size);
-            let cSum = 0;
-            for (let i = 0; i < cData.data.length; i+=4) {
-                cSum += (0.299 * cData.data[i] + 0.587 * cData.data[i+1] + 0.114 * cData.data[i+2]);
+            let whitePoints = [
+                {x: geo.boxX + geo.boxW * 0.15, y: geo.boxY + geo.boxH * 0.05},
+                {x: geo.boxX + geo.boxW * 0.85, y: geo.boxY + geo.boxH * 0.05}
+            ];
+            let highestAvg = 0;
+            for(let wp of whitePoints) {
+                let sx = Math.max(0, Math.min(ctx.canvas.width - size, wp.x - half));
+                let sy = Math.max(0, Math.min(ctx.canvas.height - size, wp.y - half));
+                let cData = ctx.getImageData(sx, sy, size, size);
+                let sum = 0;
+                for (let i = 0; i < cData.data.length; i+=4) {
+                    sum += (0.299 * cData.data[i] + 0.587 * cData.data[i+1] + 0.114 * cData.data[i+2]);
+                }
+                let avg = sum / (cData.data.length / 4);
+                if(avg > highestAvg) highestAvg = avg;
             }
-            let cAvg = cSum / (cData.data.length / 4);
 
-            if (cAvg < 110) return false; 
+            let paperBrightness = highestAvg || 200;
+            if (paperBrightness < 100) return false;
 
-            let darkThreshold = cAvg * 0.65; 
+            let darkThreshold = paperBrightness * 0.65; 
+            let requiredDarkPixelsRatio = 0.15; 
             
             let titikUjian = [
                 {x: geo.boxX - half, y: geo.boxY - half}, 
@@ -1208,28 +1215,28 @@
                 {x: geo.boxX + geo.boxW - half, y: geo.boxY + geo.boxH - half} 
             ];
 
-            let jumlahGelap = 0;
             for (let pt of titikUjian) {
                 let ptx = Math.max(0, Math.min(ctx.canvas.width - size, pt.x));
                 let pty = Math.max(0, Math.min(ctx.canvas.height - size, pt.y));
                 
                 let imgData = ctx.getImageData(ptx, pty, size, size);
                 let pixels = imgData.data;
-                let sum = 0;
+                let darkCount = 0;
+                let totalPixels = pixels.length / 4;
                 
                 for (let i = 0; i < pixels.length; i += 4) {
-                    sum += (0.299 * pixels[i] + 0.587 * pixels[i+1] + 0.114 * pixels[i+2]);
+                    let brightness = (0.299 * pixels[i] + 0.587 * pixels[i+1] + 0.114 * pixels[i+2]);
+                    if (brightness < darkThreshold) {
+                        darkCount++;
+                    }
                 }
-                let avg = sum / (pixels.length / 4);
                 
-                if (avg < darkThreshold) {
-                    jumlahGelap++; 
-                } else {
-                    return false;
+                if ((darkCount / totalPixels) < requiredDarkPixelsRatio) {
+                    return false; 
                 }
             }
 
-            return jumlahGelap === 6;
+            return true;
         }
 
         // ==========================================
