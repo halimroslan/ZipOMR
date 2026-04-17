@@ -1078,7 +1078,6 @@
             let gridY = innerY + headerH;
             let gridH = innerH * 0.80;
 
-            // 7 baris Atas + 2 ruang kosong + 8 baris Bawah = 17 baris
             let rowHeight = gridH / 17; 
             let colW = innerW * 0.32;
 
@@ -1114,7 +1113,7 @@
                 return { cy: cY, posX: posX };
             }
 
-            return { boxX, boxY, boxW, boxH, rowHeight, getPilihanGeometri, layout: '40' };
+            return { boxX, boxY, boxW, boxH, rowHeight, getPilihanGeometri, innerX, innerY, innerW, innerH, colW, layout: '40' };
         }
 
         // ==========================================
@@ -1262,6 +1261,28 @@
                     ctx.stroke();
                 }
             }
+            
+            if (geo.layout === '20' || geo.layout === '30') {
+                let midX = geo.innerX + (geo.innerW / 2);
+                ctx.beginPath();
+                ctx.moveTo(midX, geo.trueQuestionStartY);
+                ctx.lineTo(midX, geo.trueQuestionStartY + geo.trueQuestionAreaH);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            } else if (geo.layout === '40') {
+                let col2X = geo.innerX + (geo.innerW - geo.colW) / 2;
+                let col3X = geo.innerX + geo.innerW - geo.colW;
+                
+                ctx.beginPath();
+                ctx.moveTo(col2X - geo.innerW*0.01, geo.innerY);
+                ctx.lineTo(col2X - geo.innerW*0.01, geo.innerY + geo.innerH);
+                ctx.moveTo(col3X - geo.innerW*0.01, geo.innerY);
+                ctx.lineTo(col3X - geo.innerW*0.01, geo.innerY + geo.innerH);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            }
         }
 
         function semakAutoSnap(ctx, geo) {
@@ -1357,6 +1378,24 @@
             ctxDebug.strokeStyle = "rgba(0, 113, 227, 0.4)";
             ctxDebug.lineWidth = 3;
             ctxDebug.strokeRect(geo.boxX, geo.boxY, geo.boxW, geo.boxH);
+            
+            if (geo.layout === '20' || geo.layout === '30') {
+                let midX = geo.innerX + (geo.innerW / 2);
+                ctxDebug.beginPath();
+                ctxDebug.moveTo(midX, geo.trueQuestionStartY);
+                ctxDebug.lineTo(midX, geo.trueQuestionStartY + geo.trueQuestionAreaH);
+                ctxDebug.stroke();
+            } else if (geo.layout === '40') {
+                let col2X = geo.innerX + (geo.innerW - geo.colW) / 2;
+                let col3X = geo.innerX + geo.innerW - geo.colW;
+                
+                ctxDebug.beginPath();
+                ctxDebug.moveTo(col2X - geo.innerW*0.01, geo.innerY);
+                ctxDebug.lineTo(col2X - geo.innerW*0.01, geo.innerY + geo.innerH);
+                ctxDebug.moveTo(col3X - geo.innerW*0.01, geo.innerY);
+                ctxDebug.lineTo(col3X - geo.innerW*0.01, geo.innerY + geo.innerH);
+                ctxDebug.stroke();
+            }
 
             let markah = 0;
             let butiran = [];
