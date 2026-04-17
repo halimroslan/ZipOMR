@@ -508,7 +508,7 @@
             let safeMaxWidth;
             if (isTwoCols) {
                 safeMaxWidth = Math.floor(availableHeight / (heightPerColWidth / 2));
-                safeMaxWidth = Math.min(550, safeMaxWidth); // Supaya ngam dengan A4 
+                safeMaxWidth = Math.min(650, safeMaxWidth); // Supaya ngam dengan A4 
             } else {
                 safeMaxWidth = Math.floor(availableHeight / heightPerColWidth);
                 safeMaxWidth = Math.min(450, safeMaxWidth); 
@@ -598,7 +598,7 @@
             } else {
                 styleTag.innerHTML = "@media print { @page { size: A4 portrait; margin: 10mm; } }";
                 labelOrientasi.innerText = "A4 Portrait";
-                bekas.className = "grid grid-cols-1 gap-8 print:gap-12 w-full";
+                bekas.className = "grid grid-cols-1 gap-6 print:gap-8 w-full";
                 bekas.style.height = "26cm"; 
                 bekas.style.gridTemplateRows = "1fr 1fr";
             }
@@ -609,7 +609,7 @@
 
             let availableHeight = 520; 
             if (sets === 6) availableHeight = 280;
-            if (sets === 2) availableHeight = 350; // Dikurangkan supaya muat 20 soalan (atas bawah) tanpa terpotong
+            if (sets === 2) availableHeight = 460; // Dibesarkan supaya muat 20 soalan maksimum secara optimum
 
             let actualRatio = ratio / 100;
             let heightPerColWidth = numRows * actualRatio;
@@ -617,7 +617,7 @@
             
             if (isTwoCols) {
                 safeMaxWidth = Math.floor(availableHeight / (heightPerColWidth / 2));
-                safeMaxWidth = Math.min(480, safeMaxWidth); // Dikecilkan sikit lebar supaya tinggi turut mengecil
+                safeMaxWidth = Math.min(560, safeMaxWidth); // Dinaikkan maksimum ke saiz optimum
             } else {
                 safeMaxWidth = Math.floor(availableHeight / heightPerColWidth);
                 safeMaxWidth = Math.min(280, safeMaxWidth);
