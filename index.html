@@ -526,7 +526,7 @@
 
             let isTwoCols = JUMLAH_SOALAN > 30;
             let numRows = isTwoCols ? 20 : JUMLAH_SOALAN;
-            let ratio = numRows <= 15 ? 12 : 9.5;
+            let ratio = numRows <= 15 ? 12 : 8.0;
 
             let availableHeight = 520; 
             if (sets === 6) availableHeight = 280;
@@ -638,7 +638,7 @@
 
             let isTwoCols = JUMLAH_SOALAN > 30;
             let numRows = isTwoCols ? 20 : JUMLAH_SOALAN;
-            let ratio = numRows <= 15 ? 12 : 9.5;
+            let ratio = numRows <= 15 ? 12 : 8.0;
 
             // Ketinggian selamat disesuaikan supaya bingkai tak langgar margin A4
             let availableHeight = 520; 
@@ -714,7 +714,7 @@
             let numRows = isTwoCols ? 20 : JUMLAH_SOALAN;
             let colW = isTwoCols ? (boxW / 2) : boxW;
             
-            let ratio = numRows <= 15 ? 0.12 : 0.095;
+            let ratio = numRows <= 15 ? 0.12 : 0.08;
             let rowHeight = colW * ratio; 
             let boxH = rowHeight * numRows;
 
