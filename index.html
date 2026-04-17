@@ -533,14 +533,13 @@
             if (sets === 2) availableHeight = 410; 
 
             let actualRatio = ratio / 100;
-            let heightPerColWidth = numRows * actualRatio;
-            let safeMaxWidth;
+            let colWRatioToBoxW = isTwoCols ? 0.45 : 0.90; // Sbb padding 5% kiri & 5% kanan (total 10%)
+            let boxRatioBoxHtoW = (numRows * actualRatio * colWRatioToBoxW) + 0.10; // Total nisbah H ke W siap padding
+            let safeMaxWidth = Math.floor(availableHeight / boxRatioBoxHtoW);
             
             if (isTwoCols) {
-                safeMaxWidth = Math.floor(availableHeight / (heightPerColWidth / 2));
                 safeMaxWidth = Math.min(520, safeMaxWidth); 
             } else {
-                safeMaxWidth = Math.floor(availableHeight / heightPerColWidth);
                 safeMaxWidth = Math.min(280, safeMaxWidth);
             }
 
@@ -564,6 +563,7 @@
                 for (let i = 0; i < JUMLAH_SOALAN; i++) {
                     soalanHtml += binaBarisSoalan(i, ratio, skemaJawapan);
                 }
+                soalanHtml = `<div class="w-full flex flex-col">${soalanHtml}</div>`;
             }
 
             divSet.innerHTML = `
@@ -582,7 +582,10 @@
                     <div class="marker-corner absolute top-0 right-0 w-4 h-4 sm:w-5 sm:h-5 bg-black z-10" style="transform: translate(50%, -50%);"></div>
                     <div class="marker-corner absolute top-[50%] right-0 w-4 h-4 sm:w-5 sm:h-5 bg-black z-10" style="transform: translate(50%, -50%);"></div>
                     <div class="marker-corner absolute bottom-0 right-0 w-4 h-4 sm:w-5 sm:h-5 bg-black z-10" style="transform: translate(50%, 50%);"></div>
-                    ${soalanHtml}
+                    <!-- Padding 5% ditambah di sini sebagai margin ruang bernafas -->
+                    <div class="w-full" style="padding: 5%;">
+                        ${soalanHtml}
+                    </div>
                 </div>
             `;
             bekas.appendChild(divSet);
@@ -646,15 +649,13 @@
             if (sets === 2) availableHeight = 410; // Dikurangkan dari 460 ke 410 supaya muat dlm 1 muka surat A4
 
             let actualRatio = ratio / 100;
-            let heightPerColWidth = numRows * actualRatio;
-            let safeMaxWidth;
+            let colWRatioToBoxW = isTwoCols ? 0.45 : 0.90;
+            let boxRatioBoxHtoW = (numRows * actualRatio * colWRatioToBoxW) + 0.10;
+            let safeMaxWidth = Math.floor(availableHeight / boxRatioBoxHtoW);
             
             if (isTwoCols) {
-                safeMaxWidth = Math.floor(availableHeight / (heightPerColWidth / 2));
-                // Had maksimum dikecilkan sedikit untuk elak tinggi melebih A4
                 safeMaxWidth = Math.min(520, safeMaxWidth); 
             } else {
-                safeMaxWidth = Math.floor(availableHeight / heightPerColWidth);
                 safeMaxWidth = Math.min(280, safeMaxWidth);
             }
 
@@ -680,6 +681,7 @@
                     for (let i = 0; i < JUMLAH_SOALAN; i++) {
                         soalanHtml += binaBarisSoalan(i, ratio, null);
                     }
+                    soalanHtml = `<div class="w-full flex flex-col">${soalanHtml}</div>`;
                 }
 
                 divSet.innerHTML = `
@@ -698,7 +700,9 @@
                         <div class="marker-corner absolute top-0 right-0 w-4 h-4 sm:w-5 sm:h-5 bg-black z-10" style="transform: translate(50%, -50%);"></div>
                         <div class="marker-corner absolute top-[50%] right-0 w-4 h-4 sm:w-5 sm:h-5 bg-black z-10" style="transform: translate(50%, -50%);"></div>
                         <div class="marker-corner absolute bottom-0 right-0 w-4 h-4 sm:w-5 sm:h-5 bg-black z-10" style="transform: translate(50%, 50%);"></div>
-                        ${soalanHtml}
+                        <div class="w-full" style="padding: 5%;">
+                            ${soalanHtml}
+                        </div>
                     </div>
                 `;
                 bekas.appendChild(divSet);
@@ -706,34 +710,45 @@
         }
 
         // ==========================================
-        // MATEMATIK GEOMETRI OMR
+        // MATEMATIK GEOMETRI OMR (DIKEMASKINI DENGAN PADDING)
         // ==========================================
         function dapatkanGeometriOMR(cw, ch) {
             let boxW = cw * 0.80; 
             let isTwoCols = JUMLAH_SOALAN > 30;
             let numRows = isTwoCols ? 20 : JUMLAH_SOALAN;
-            let colW = isTwoCols ? (boxW / 2) : boxW;
+            
+            const padPct = 0.05; // 5% margin ruangan dlm
+            let padding = boxW * padPct;
+            let innerBoxW = boxW - (padding * 2);
+            let colW = isTwoCols ? (innerBoxW / 2) : innerBoxW;
             
             let ratio = numRows <= 15 ? 0.12 : 0.08;
             let rowHeight = colW * ratio; 
-            let boxH = rowHeight * numRows;
+            let innerBoxH = rowHeight * numRows;
+            let boxH = innerBoxH + (padding * 2);
 
             if (boxH > ch * 0.80) {
+                let scaleFactor = (ch * 0.80) / boxH;
+                boxW *= scaleFactor;
+                padding *= scaleFactor;
+                innerBoxW *= scaleFactor;
+                colW *= scaleFactor;
+                rowHeight *= scaleFactor;
+                innerBoxH *= scaleFactor;
                 boxH = ch * 0.80;
-                rowHeight = boxH / numRows;
-                colW = rowHeight / ratio;
-                boxW = isTwoCols ? (colW * 2) : colW;
             }
 
             const boxX = (cw - boxW) / 2;
             const boxY = (ch - boxH) / 2;
+            const innerBoxX = boxX + padding;
+            const innerBoxY = boxY + padding;
 
             function getPilihanGeometri(soalanIndex) {
                 let col = isTwoCols && soalanIndex >= 20 ? 1 : 0;
                 let row = isTwoCols && soalanIndex >= 20 ? soalanIndex - 20 : soalanIndex;
 
-                let cX = boxX + (col * colW);
-                let cY = boxY + (row * rowHeight) + (rowHeight / 2);
+                let cX = innerBoxX + (col * colW);
+                let cY = innerBoxY + (row * rowHeight) + (rowHeight / 2);
 
                 let posX = [
                     cX + colW * 0.265, 
@@ -745,7 +760,7 @@
                 return { cy: cY, posX: posX };
             }
 
-            return { boxX, boxY, boxW, boxH, rowHeight, colW, isTwoCols, getPilihanGeometri };
+            return { boxX, boxY, boxW, boxH, rowHeight, colW, isTwoCols, getPilihanGeometri, innerBoxX, innerBoxY, innerBoxH };
         }
 
         // ==========================================
@@ -908,11 +923,11 @@
                 }
             }
             
-            // Draw center divider if 2 cols
+            // Draw center divider if 2 cols (Follow inner boundaries now)
             if (geo.isTwoCols) {
                 ctx.beginPath();
-                ctx.moveTo(geo.boxX + geo.colW, geo.boxY);
-                ctx.lineTo(geo.boxX + geo.colW, geo.boxY + geo.boxH);
+                ctx.moveTo(geo.innerBoxX + geo.colW, geo.innerBoxY);
+                ctx.lineTo(geo.innerBoxX + geo.colW, geo.innerBoxY + geo.innerBoxH);
                 ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
                 ctx.lineWidth = 2;
                 ctx.stroke();
@@ -1015,8 +1030,8 @@
             
             if (geo.isTwoCols) {
                 ctxDebug.beginPath();
-                ctxDebug.moveTo(geo.boxX + geo.colW, geo.boxY);
-                ctxDebug.lineTo(geo.boxX + geo.colW, geo.boxY + geo.boxH);
+                ctxDebug.moveTo(geo.innerBoxX + geo.colW, geo.innerBoxY);
+                ctxDebug.lineTo(geo.innerBoxX + geo.colW, geo.innerBoxY + geo.innerBoxH);
                 ctxDebug.stroke();
             }
 
